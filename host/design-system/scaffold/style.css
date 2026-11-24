@@ -1,0 +1,6 @@
+/* Styles for this card.
+ *
+ * The default view already handles data shapes, truncation and light/dark.
+ * When editing, write layout only: colors, type and spacing must come from
+ * the --od-* tokens. Never hard-code colors or fonts below 11px.
+ */

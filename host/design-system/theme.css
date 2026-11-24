@@ -1,0 +1,538 @@
+/* Open Desktop design system, applied inside every card iframe.
+ *
+ * The host injects this stylesheet before the card's own style.css.
+ * Only --od-* tokens are used here; card code should follow the same rule.
+ * Component classes are prefixed with od- and combine structure + state.
+ */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--od-bg);
+  color: var(--od-fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  font-size: var(--od-text-md, 13px);
+  line-height: 1.45;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ---------- Layout primitives ---------- */
+
+.od-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--od-space-3, 12px);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.od-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--od-space-2, 8px);
+  min-height: 0;
+}
+
+.od-cluster {
+  display: flex;
+  align-items: baseline;
+  gap: var(--od-space-2, 8px);
+  min-width: 0;
+}
+
+.od-grow {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.od-spread {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--od-space-2, 8px);
+  min-width: 0;
+}
+
+.od-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--od-space-2, 8px);
+  min-height: 0;
+}
+
+/* ---------- Typography ---------- */
+
+.od-display {
+  font-size: var(--od-text-hero, 34px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.od-value {
+  font-size: var(--od-text-metric, 20px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.od-label {
+  font-size: var(--od-text-xs, 11px);
+  color: var(--od-fg-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.od-muted {
+  color: var(--od-fg-2);
+}
+
+.od-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.od-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.od-up {
+  color: var(--od-green);
+}
+
+.od-down {
+  color: var(--od-red);
+}
+
+.od-warn {
+  color: var(--od-amber);
+}
+
+/* ---------- Metric ---------- */
+
+.od-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--od-space-1, 4px);
+  flex: none;
+  min-width: 0;
+}
+
+.od-hero[data-tone="up"] .od-metric-value {
+  color: var(--od-green);
+}
+
+.od-hero[data-tone="down"] .od-metric-value {
+  color: var(--od-red);
+}
+
+.od-hero[data-tone="warn"] .od-metric-value {
+  color: var(--od-amber);
+}
+
+.od-metric-label {
+  font-size: var(--od-text-xs, 11px);
+  color: var(--od-fg-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.od-metric-value {
+  font-size: var(--od-text-hero, 34px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.od-hero-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--od-space-2, 8px);
+  min-width: 0;
+}
+
+.od-delta-pill {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--od-text-xs, 11px);
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--od-surface-2);
+  color: var(--od-fg-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.od-delta-pill[data-tone="up"] {
+  color: var(--od-green);
+  background: color-mix(in srgb, var(--od-green) 12%, transparent);
+}
+
+.od-delta-pill[data-tone="down"] {
+  color: var(--od-red);
+  background: color-mix(in srgb, var(--od-red) 12%, transparent);
+}
+
+.od-delta-pill[data-tone="warn"] {
+  color: var(--od-amber);
+  background: color-mix(in srgb, var(--od-amber) 12%, transparent);
+}
+
+/* ---------- Rows ---------- */
+
+.od-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--od-space-2, 8px);
+  overflow: hidden;
+}
+
+.od-row,
+.od-row-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: var(--od-space-2, 8px);
+  min-width: 0;
+  font-size: var(--od-text-sm, 12px);
+  text-decoration: none;
+  color: inherit;
+}
+
+.od-row-wrap {
+  flex-direction: column;
+  gap: 1px;
+  align-items: stretch;
+}
+
+.od-row-wrap .od-row {
+  font-size: inherit;
+}
+
+a.od-row:hover .od-row-label,
+a.od-row-wrap:hover .od-row-label {
+  text-decoration: underline;
+}
+
+.od-row-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.od-row-value {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.od-row-sub {
+  font-size: var(--od-text-xs, 11px);
+  color: var(--od-fg-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.od-rank {
+  flex: none;
+  min-width: 18px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--od-text-xs, 11px);
+  font-variant-numeric: tabular-nums;
+  color: var(--od-fg-3);
+}
+
+.od-list-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--od-space-2, 8px);
+  padding-bottom: var(--od-space-2, 8px);
+  border-bottom: 1px solid var(--od-line);
+  flex: none;
+}
+
+.od-list-count {
+  font-size: var(--od-text-xs, 11px);
+  color: var(--od-fg-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.od-note {
+  flex: none;
+  margin-top: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--od-text-xs, 11px);
+  color: var(--od-fg-3);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.od-more {
+  flex: none;
+  border: 0;
+  background: transparent;
+  color: var(--od-fg-2);
+  font-size: var(--od-text-xs, 11px);
+  text-align: left;
+  cursor: default;
+  padding: 0;
+}
+
+/* ---------- Table ---------- */
+
+.od-table-head,
+.od-table-row {
+  display: grid;
+  gap: 2px var(--od-space-3, 12px);
+  align-items: center;
+}
+
+.od-table-head {
+  flex: none;
+  padding: 0 0 var(--od-space-2, 8px);
+}
+
+.od-table-row {
+  padding: var(--od-space-2, 8px) 0;
+  border-top: 1px solid var(--od-line);
+}
+
+.od-table-row:hover {
+  background: var(--od-surface-2);
+}
+
+.od-th {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--od-text-xs, 11px);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--od-fg-3);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.od-td {
+  font-size: var(--od-text-sm, 12px);
+  color: var(--od-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.od-td-key {
+  color: var(--od-fg);
+}
+
+/* ---------- Status ---------- */
+
+.od-status-rows {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.od-status-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  column-gap: var(--od-space-2, 8px);
+  row-gap: 2px;
+  align-items: center;
+  padding: var(--od-space-2, 8px) 0;
+  border-top: 1px solid var(--od-line);
+  min-height: 36px;
+  flex: 1 1 0;
+}
+
+.od-status-row:first-child {
+  border-top: 0;
+}
+
+.od-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--od-fg) 55%, transparent);
+  flex: none;
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+}
+
+.od-status-row[data-state="up"] .od-status-dot {
+  background: var(--od-green);
+}
+
+.od-status-row[data-state="warn"] .od-status-dot {
+  background: var(--od-amber);
+}
+
+.od-status-row[data-state="down"] .od-status-dot {
+  background: var(--od-red);
+}
+
+.od-status-name {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  font-size: var(--od-text-md, 13px);
+  color: var(--od-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.od-status-value {
+  grid-column: 3;
+  grid-row: 1;
+  font-size: var(--od-text-md, 13px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.od-status-sub {
+  grid-column: 2 / 4;
+  grid-row: 2;
+  font-size: var(--od-text-xs, 11px);
+  color: var(--od-fg-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Badges / empty / skeleton ---------- */
+
+.od-badge {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  font-size: var(--od-text-xs, 11px);
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--od-surface-2);
+  color: var(--od-fg-2);
+  white-space: nowrap;
+}
+
+.od-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid var(--od-line);
+  background: transparent;
+  color: var(--od-fg-2);
+  font-size: var(--od-text-xs, 11px);
+  white-space: nowrap;
+}
+
+.od-empty {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--od-space-2, 8px);
+  color: var(--od-fg-2);
+  font-size: var(--od-text-sm, 12px);
+  text-align: center;
+  min-height: 0;
+}
+
+.od-skel {
+  background: var(--od-hover);
+  border-radius: 6px;
+  height: 11px;
+  animation: od-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes od-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.95; }
+}
+
+/* ---------- Text / progress / sparkline ---------- */
+
+.od-text {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: var(--od-text-sm, 12px);
+  line-height: 1.55;
+  color: var(--od-fg);
+}
+
+.od-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--od-surface-2);
+  overflow: hidden;
+  flex: none;
+}
+
+.od-progress-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--od-blue);
+  transition: width 0.2s ease;
+}
+
+.od-spark {
+  display: block;
+  width: 100%;
+  height: 28px;
+  color: var(--od-fg-2);
+  overflow: visible;
+}
+
+.od-spark-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.od-spark-area {
+  fill: currentColor;
+  opacity: 0.1;
+  stroke: none;
+}

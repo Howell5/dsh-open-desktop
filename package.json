@@ -1,0 +1,73 @@
+{
+  "name": "dsh-open-desktop",
+  "version": "0.4.2",
+  "type": "module",
+  "description": "把 DSH 的中栏变成可拖拽的数据卡片墙：每张卡片是一条真实会话，用 view/ 里的前端代码渲染，自带刷新节奏。",
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "dsh",
+    "deepseek",
+    "widgets",
+    "dashboard",
+    "bento",
+    "cards"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build-client.mjs",
+    "build:watch": "node scripts/build-client.mjs --watch",
+    "test": "node test/smoke.mjs",
+    "harness": "node scripts/build-harness.mjs"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "host/",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  },
+  "devDependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "esbuild": "^0.28.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "homepage": "https://github.com/Howell5/dsh-open-desktop#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Howell5/dsh-open-desktop.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Howell5/dsh-open-desktop/issues"
+  },
+  "engines": {
+    "dsh": ">=0.2.2-rc.3 <0.3.0-0"
+  },
+  "author": "Howell5"
+}
