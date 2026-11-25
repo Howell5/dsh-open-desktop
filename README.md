@@ -26,18 +26,17 @@ dsh plugin --profile desktop add dsh-open-desktop
 - **每卡独立刷新**：`template` / `command` / `file` / `url` 四种数据源，或每天固定时刻；属性弹窗里直接改频率。
 - **唯一渲染路径**：`view/index.html + style.css + view.js`，沙箱 iframe + CSP，外链资源会被门禁打回。
 - **设计系统注入**：`--od-*` token、`od-*` 组件类、`window.od` 运行时；卡片只写内容，不重画外壳。
-- **31 张模板**：今天 / 工作 / 钱 / 信息 / 生活 / 数字资产，每类 5 张。
+- **31 张模板**：今天 / 工作 / 钱 / 信息 / 生活 / 数字资产；工作 6 张（含待办清单），其余每类 5 张。
+- **交互卡**：待办清单可以勾选、增删、双击编辑；状态写回卡片自己的 `data/state.json`（`dshWidget.save`）。
 - **原生会话**：点「修改」进入卡片自己的 DSH 会话，顶部可预览卡片或返回板面。
 
 ## 交互
 
 拖拽时目标格子留出同尺寸虚线占位，其余卡片实时让位；支持触屏长按和键盘（空格拿起 / 方向键移动 / 空格放下 / Escape 取消）。
 
-![拖拽排序](https://cdn.jsdelivr.net/gh/Howell5/dsh-open-desktop@main/docs/drag.png)
 
 卡片 `⋯ → 属性…` 可以改标题、尺寸和刷新频率；选「每天」时时间下拉固定在第二行，不会挤动「更多」。
 
-![卡片属性](https://cdn.jsdelivr.net/gh/Howell5/dsh-open-desktop@main/docs/properties.png)
 
 ## 卡片模型
 
@@ -56,7 +55,7 @@ $DSH_HOME/open-desktop/
 ```bash
 npm install
 npm run build        # src/client/ → client.js（esbuild，react 由宿主注入）
-npm test             # 214 条测试
+npm test             # 217 条测试
 npm run harness      # 可选：普通浏览器里的拖拽验证台
 ```
 
