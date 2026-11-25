@@ -26,7 +26,7 @@ dsh plugin --profile desktop add dsh-open-desktop
 - **每卡独立刷新**：`template` / `command` / `file` / `url` 四种数据源，或每天固定时刻；属性弹窗里直接改频率。
 - **唯一渲染路径**：`view/index.html + style.css + view.js`，沙箱 iframe + CSP，外链资源会被门禁打回。
 - **设计系统注入**：`--od-*` token、`od-*` 组件类、`window.od` 运行时；卡片只写内容，不重画外壳。
-- **30 张模板**：今天 / 工作 / 钱 / 信息 / 生活 / 数字资产，每类 5 张。
+- **31 张模板**：今天 / 工作 / 钱 / 信息 / 生活 / 数字资产，每类 5 张。
 - **原生会话**：点「修改」进入卡片自己的 DSH 会话，顶部可预览卡片或返回板面。
 
 ## 交互

@@ -202,6 +202,7 @@ function apiHandler(board, origin) {
           case 'card-update': return board.update(args)
           case 'card-remove': return board.remove(args)
           case 'card-reorder': return board.reorder(args)
+          case 'card-data': return board.writeData(args)
           case 'card-refresh': return board.refresh(args)
           case 'card-inspect': return board.inspect(args)
           case 'card-turns': return board.turns(args)

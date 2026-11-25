@@ -646,7 +646,7 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
       const csp = "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'";
       const runtime = `(function(){
         function applyTokens(tokens){if(!tokens)return;var root=document.documentElement;for(var key in tokens){root.style.setProperty("--od-"+key,tokens[key])}}
-        window.dshWidget={data:null,tokens:{},size:{w:0,h:0},fetch:function(url,init){var id="f"+Math.random().toString(36).slice(2);return new Promise(function(resolve,reject){function onMessage(event){var message=event.data||{};if(message.__od!==true||message.type!=="fetch-result"||message.id!==id)return;window.removeEventListener("message",onMessage);if(message.ok)resolve(message.value);else reject(new Error(message.error||"fetch failed"))}window.addEventListener("message",onMessage);parent.postMessage({__od:true,type:"fetch",id:id,url:String(url),init:init||null},"*")})}};
+        window.dshWidget={data:null,tokens:{},size:{w:0,h:0},save:function(value){parent.postMessage({__od:true,type:"save",value:value},"*")},fetch:function(url,init){var id="f"+Math.random().toString(36).slice(2);return new Promise(function(resolve,reject){function onMessage(event){var message=event.data||{};if(message.__od!==true||message.type!=="fetch-result"||message.id!==id)return;window.removeEventListener("message",onMessage);if(message.ok)resolve(message.value);else reject(new Error(message.error||"fetch failed"))}window.addEventListener("message",onMessage);parent.postMessage({__od:true,type:"fetch",id:id,url:String(url),init:init||null},"*")})}};
         function report(){try{var d=document.documentElement;var b=document.body;var sh=Math.max(d?d.scrollHeight:0,b?b.scrollHeight:0);var ch=window.innerHeight||(d?d.clientHeight:0);parent.postMessage({__od:true,type:"overflow",scrollHeight:sh,clientHeight:ch},"*")}catch(error){}}
         window.addEventListener("message",function(event){var message=event.data||{};if(message.__od!==true)return;if(message.type==="hello"){parent.postMessage({__od:true,type:"ready"},"*");return}if(message.type==="tokens"){window.dshWidget.tokens=message.tokens||{};applyTokens(message.tokens);return}if(message.type==="data"){if(message.tokens)applyTokens(message.tokens);if(message.size)window.dshWidget.size=message.size;window.dshWidget.data=message.value;if(typeof window.dshWidget.onData==="function")window.dshWidget.onData(message.value);report()}});
         document.addEventListener("click",function(event){var target=event.target;var link=target&&target.closest?target.closest("a[href]"):null;if(!link)return;var href=link.getAttribute("href")||"";if(!/^https?:\\/\\//i.test(href))return;event.preventDefault();parent.postMessage({__od:true,type:"open",url:href},"*")},true);
@@ -738,6 +738,10 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
           }
           if (message.type === 'grow') {
             if (typeof props.onGrow === 'function') props.onGrow(widget);
+            return;
+          }
+          if (message.type === 'save') {
+            if (typeof props.onSave === 'function') props.onSave(message.value);
             return;
           }
           if (message.type === 'fetch') {
@@ -909,6 +913,7 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
         onOverflow: function (report) { props.onOverflow?.(widget.id, report); },
         onFetch: function (request) { return props.onFetch(widget.id, request); },
         onGrow: function (item) { props.onGrow?.(item); },
+        onSave: function (value) { props.onSave?.(widget.id, value); },
       });
     }
 
@@ -1323,6 +1328,7 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
           onGrow: props.onGrow,
           onOverflow: props.onOverflow,
           onFetch: props.onFetch,
+          onSave: props.onSave,
           dragging: drag !== null && drag.id === widget.id,
           dragStyle: fixed ? dragStyle : null,
         });
@@ -1826,6 +1832,12 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
         id: 'git', category: 'work', title: 'Git 未提交 / 未推送', size: { w: 5, h: 7 }, schedule: every(300_000),
         blurb: '我到底忘了 push 什么',
         prompt: '做一个 Git 待办卡片：扫描 ~/Code 下的仓库（把路径换成你的），列出每个仓库的未提交文件数、未推送的提交数、当前分支。只显示有未提交或未推送的仓库，全部干净时显示「都干净了」。用本机 git 命令，不要联网。',
+      },
+
+      {
+        id: 'todo', category: 'work', title: '待办清单', size: { w: 5, h: 6 }, schedule: every(300_000),
+        blurb: '像 iOS 提醒事项一样勾选、增删改',
+        prompt: '做一个待办清单卡片，像 iOS 提醒事项：圆形勾选框、完成划线、发丝线分行、底部输入框。数据存在 data/state.json，结构为 {"items":[{"id":1,"text":"...","done":false,"tag":"今天"}]}；首次创建时写入空列表。用 window.dshWidget.data 读取，新增/勾选/删除/双击编辑后调用 window.dshWidget.save({items})。不要用 localStorage（沙箱不允许）。调 card_set_refresh 时传 file="data/state.json"、everyMs=300000。',
       },
 
       // 钱
@@ -2639,6 +2651,9 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
                 return store.requestRaw('renderer-fetch', { id: id, url: request.url }).then(function (body) { return body.value; });
               },
               onMove: moveWidget,
+              onSave: function (id, value) {
+                run('card-data', { id: id, value: value }).catch(function () { /* banner 已提示 */ });
+              },
             })
         ),
         activeCard && h(CardChatPanel, {

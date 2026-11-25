@@ -42,6 +42,7 @@
 
 动作：`state` / `card-create {text,title?,size?}` / `card-session {id}` / `card-prompt {id,text}` /
 `card-update {id,title?,size?,order?,refresh?}` / `card-remove {id}` / `card-reorder {ids}` /
+`card-data {id,value}` /
 `card-refresh {id?}` / `card-inspect {id}` / `card-turns {id}` / `card-view {id}` / `card-chat {id}` /
 `card-chat-close` / `card-cancel {id}` / `pause {paused}` / `open` / `renderer-fetch {id,url}` / `client-log {...}`。
 
@@ -64,6 +65,8 @@
 只有 custom 才带的情况。`templates` 提供 id/title/description/defaultEveryMs/fields。
 `design` 是注入每个 iframe 的设计系统（`theme.css` + `runtime.js`），由 Host 在启动时读取一次。
 板面和会话预览共享同一个客户端 store；SSE 与轮询更新同一份状态。返回板面的定位请求只保存在客户端，不修改 Host 的 `openAt`，避免重新打开会话。
+
+`card-data` 是卡片 view 的交互状态写回：`value` 必须是 JSON、序列化后 ≤64KB，Host 原子写入 `cards/<id>/data/state.json` 并触发这张卡刷新。view 里用 `window.dshWidget.save(value)` 调用；只允许写这张卡自己的 `data/`，不暴露任意路径。待办、清单这类需要增删改的卡片用它持久化。
 
 ## 4. 工作区、目录与权限
 

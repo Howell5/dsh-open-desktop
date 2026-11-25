@@ -20,9 +20,11 @@ window.dshWidget.onData = fn   // 每次刷新时调用 fn(value)
 window.dshWidget.tokens        // 宿主主题 token
 window.dshWidget.size          // { w, h } 卡片网格尺寸
 window.dshWidget.fetch(url)    // 走宿主代理请求 http(s)，返回 Promise
+window.dshWidget.save(value)   // 交互卡写回自己的 data/state.json（JSON，≤64KB）
 ```
 
 - 不要在卡片里直接 `fetch()` / `XMLHttpRequest`：CSP 会拦掉，用 `dshWidget.fetch`。
+- 待办、清单这类要增删改的卡：用 `dshWidget.save(value)` 写回，`card_set_refresh` 配 `file="data/state.json"`；不要用 `localStorage`（沙箱不允许）。
 - 不要用 `window.open`：链接写成 `<a href="https://…">`，宿主会接管打开。
 - 每次刷新只替换内容，不要重载页面。
 

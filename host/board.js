@@ -2,7 +2,7 @@
 //
 // 板面 = 同一组卡片的网格视图。这里不存卡片（card.json 是唯一真相源），
 // 只负责：组装 State、执行动作、广播变更。
-import { appendFile, mkdir } from 'node:fs/promises'
+import { appendFile, mkdir, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { TEMPLATE_LIST } from './templates.js'
 import { cardTurns } from './turns.js'
@@ -12,6 +12,8 @@ import { readViewSync } from './views.js'
 
 // 同时生成中的卡片上限：不排队，超出直接拒绝并提示。
 const MAX_BUILDING_CARDS = 8
+// 卡片自己保存的交互状态（待办、清单等）：只写 data/state.json，限制 64KB。
+const MAX_DATA_BYTES = 64 * 1024
 
 export function createBoard({ ctx, paths, cards, refresh, sessions }) {
   const listeners = new Set()
@@ -141,6 +143,26 @@ export function createBoard({ ctx, paths, cards, refresh, sessions }) {
     return { refreshed: list.length }
   }
 
+  // 交互状态：卡片 view 通过 dshWidget.save(value) 写回自己的 data/state.json。
+  // 只允许落在这个卡片的 data/ 下，便于 file 刷新和手动备份。
+  const writeData = async ({ id, value } = {}) => {
+    const card = requireCard(id)
+    let text
+    try { text = JSON.stringify(value) } catch (error) { text = undefined }
+    if (typeof text !== 'string') throw Object.assign(new Error('卡片状态必须是 JSON'), { code: 'bad-data' })
+    const bytes = Buffer.byteLength(text, 'utf8')
+    if (bytes > MAX_DATA_BYTES) throw Object.assign(new Error('卡片状态超过 64KB'), { code: 'data-too-large' })
+    const dir = join(paths.cardDir(card.id), 'data')
+    await mkdir(dir, { recursive: true })
+    const file = join(dir, 'state.json')
+    const temp = file + '.tmp'
+    await writeFile(temp, text, 'utf8')
+    await rename(temp, file)
+    try { refresh?.refresh?.([card]) } catch { /* 忽略 */ }
+    publish()
+    return { written: true, bytes }
+  }
+
   const inspect = async ({ id } = {}) => {
     const card = requireCard(id)
     const result = await sessions.inspect(card.id)
@@ -228,6 +250,7 @@ export function createBoard({ ctx, paths, cards, refresh, sessions }) {
     reorder,
     setPaused,
     refresh: refreshNow,
+    writeData,
     inspect,
     cancel,
     turns,

@@ -83,6 +83,14 @@ const withDaily = await board.update({ id: card.id, refresh: { template: 'wifi',
 check('更新为每天固定时刻', withDaily.refresh?.template === 'wifi' && withDaily.refresh?.dailyAt === '10:00' && withDaily.refresh?.everyMs === 86400000)
 check('State 带设计系统', typeof board.snapshot().design?.css === 'string' && board.snapshot().design.css.includes('.od-view'))
 
+// 交互状态写入：只落 cardId/data/state.json，超过 64KB 拒绝
+const savedState = await board.writeData({ id: card.id, value: { items: [{ id: 1, text: '买猫粮', done: false }] } })
+const savedFile = JSON.parse(await readFile(join(paths.cardDir(card.id), 'data', 'state.json'), 'utf8'))
+check('卡片交互状态写入 data/state.json', savedState.written === true && savedFile.items?.[0]?.text === '买猫粮')
+let tooBig = false
+try { await board.writeData({ id: card.id, value: { text: 'x'.repeat(70 * 1024) } }) } catch (error) { tooBig = error.code === 'data-too-large' }
+check('卡片状态超过 64KB 被拒绝', tooBig)
+
 // 4) 重排
 const bad = await board.reorder({ ids: ['nope'] }).then(() => false, (error) => error.code === 'bad-reorder')
 check('非法重排被拒', bad)

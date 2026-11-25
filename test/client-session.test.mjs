@@ -172,6 +172,7 @@ if (Header) {
   const frame = find(viewTree, item => item.type === 'iframe')
   check('card content renders a sandbox iframe', frame?.props.sandbox === 'allow-scripts')
   check('iframe includes the design system', String(frame?.props.srcDoc).includes('.od-view') && String(frame?.props.srcDoc).includes('window.od'))
+  check('iframe exposes dshWidget.save', String(frame?.props.srcDoc).includes('type:"save"'))
   check('iframe includes the card view code', String(frame?.props.srcDoc).includes('dshWidget.onData'))
   view.unmount()
   content.unmount()
@@ -278,7 +279,7 @@ if (Header) {
       sceneTree = renderModal()
       counts.push(sceneButtons(sceneTree).length)
     }
-    check('each category offers five scenes', counts.join(',') === '5,5,5,5,5,5')
+    check('each category offers its scenes', counts.join(',') === '5,6,5,5,5,5')
     check('free text defaults to daily at 10:00', hints(renderModal()).includes('每天 10:00 更新一次'))
     const firstScene = sceneButtons(sceneTree)[0]
     check('scene cards show a title and a value line', !!textOf(firstScene?.props?.children?.[0]) && !!textOf(firstScene?.props?.children?.[1]))
