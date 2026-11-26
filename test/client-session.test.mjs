@@ -279,7 +279,7 @@ if (Header) {
       sceneTree = renderModal()
       counts.push(sceneButtons(sceneTree).length)
     }
-    check('each category offers its scenes', counts.join(',') === '5,6,5,5,5,5')
+    check('each category offers its scenes', counts.join(',') === '5,7,5,5,5,5')
     check('free text defaults to daily at 10:00', hints(renderModal()).includes('每天 10:00 更新一次'))
     const firstScene = sceneButtons(sceneTree)[0]
     check('scene cards show a title and a value line', !!textOf(firstScene?.props?.children?.[0]) && !!textOf(firstScene?.props?.children?.[1]))
