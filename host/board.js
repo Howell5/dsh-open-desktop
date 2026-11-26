@@ -2,7 +2,7 @@
 //
 // 板面 = 同一组卡片的网格视图。这里不存卡片（card.json 是唯一真相源），
 // 只负责：组装 State、执行动作、广播变更。
-import { appendFile, mkdir, rename, writeFile } from 'node:fs/promises'
+import { appendFile, mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { TEMPLATE_LIST } from './templates.js'
 import { cardTurns } from './turns.js'
@@ -144,21 +144,35 @@ export function createBoard({ ctx, paths, cards, refresh, sessions }) {
   }
 
   // 交互状态：卡片 view 通过 dshWidget.save(value) 写回自己的 data/state.json。
-  // 只允许落在这个卡片的 data/ 下，便于 file 刷新和手动备份。
+  // 语义是「浅合并」而不是覆盖：同一张卡可能同时存时间窗、选中项、勾选状态，
+  // 各自 save 自己那几个键，不能互相抹掉。只允许落在这张卡片的 data/ 下。
   const writeData = async ({ id, value } = {}) => {
     const card = requireCard(id)
+    const dir = join(paths.cardDir(card.id), 'data')
+    const file = join(dir, 'state.json')
+
+    const isPlain = (item) => item !== null && typeof item === 'object' && !Array.isArray(item)
+    let previous = {}
+    try {
+      const current = JSON.parse(await readFile(file, 'utf8'))
+      if (isPlain(current)) previous = current
+    } catch { /* 首次写入或文件损坏：从空对象开始 */ }
+
+    const next = isPlain(value)
+      ? { ...previous, ...value }
+      : value
     let text
-    try { text = JSON.stringify(value) } catch (error) { text = undefined }
+    try { text = JSON.stringify(next) } catch { text = undefined }
     if (typeof text !== 'string') throw Object.assign(new Error('卡片状态必须是 JSON'), { code: 'bad-data' })
     const bytes = Buffer.byteLength(text, 'utf8')
     if (bytes > MAX_DATA_BYTES) throw Object.assign(new Error('卡片状态超过 64KB'), { code: 'data-too-large' })
-    const dir = join(paths.cardDir(card.id), 'data')
+
     await mkdir(dir, { recursive: true })
-    const file = join(dir, 'state.json')
     const temp = file + '.tmp'
     await writeFile(temp, text, 'utf8')
     await rename(temp, file)
-    try { refresh?.refresh?.([card]) } catch { /* 忽略 */ }
+    // 不在这里重新取数：卡片自己刚改完状态，本地已经是新的；
+    // 再触发一次网络刷新只会让点击变慢，还可能用旧快照覆盖视图。
     publish()
     return { written: true, bytes }
   }

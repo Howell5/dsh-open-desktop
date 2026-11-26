@@ -87,6 +87,12 @@ check('State 带设计系统', typeof board.snapshot().design?.css === 'string' 
 const savedState = await board.writeData({ id: card.id, value: { items: [{ id: 1, text: '买猫粮', done: false }] } })
 const savedFile = JSON.parse(await readFile(join(paths.cardDir(card.id), 'data', 'state.json'), 'utf8'))
 check('卡片交互状态写入 data/state.json', savedState.written === true && savedFile.items?.[0]?.text === '买猫粮')
+// 浅合并：两次写不同的键，前一次的键不能被抹掉
+await board.writeData({ id: card.id, value: { range: '1M' } })
+await board.writeData({ id: card.id, value: { focus: 'NVDA' } })
+const merged = JSON.parse(await readFile(join(paths.cardDir(card.id), 'data', 'state.json'), 'utf8'))
+check('卡片状态是浅合并', merged.range === '1M' && merged.focus === 'NVDA' && merged.items?.[0]?.text === '买猫粮')
+
 let tooBig = false
 try { await board.writeData({ id: card.id, value: { text: 'x'.repeat(70 * 1024) } }) } catch (error) { tooBig = error.code === 'data-too-large' }
 check('卡片状态超过 64KB 被拒绝', tooBig)

@@ -43,6 +43,8 @@ window.dshWidget.save(value)   // 交互卡写回自己的 data/state.json（JSO
 | `od-table-head` / `od-table-row` / `od-th` / `od-td` | 表格 |
 | `od-status-rows` / `od-status-row` / `od-status-dot` | 状态列表 |
 | `od-badge` / `od-chip` | 徽章 / 胶囊标签 |
+| `od-range` | 切片切换（1D / 1W / 1M / 1Y…）；`aria-pressed="true"` 是当前档 |
+| `od-back` | 从详情层返回总览层 |
 | `od-empty` / `od-skel` | 空态 / 骨架屏 |
 | `od-up` / `od-down` / `od-warn` | 语义色 |
 | `od-mono` / `od-num` / `od-label` / `od-muted` | 排版辅助 |
@@ -61,6 +63,29 @@ od.formatNumber(value, digits)
 od.formatPercent(value, digits)
 od.empty(message, hint)
 ```
+
+## 两层视图：总览 ⇄ 详情
+
+常驻卡片最多两层，不要跳到网页或新窗口：
+
+1. **总览**：一张卡能一眼看完的摘要（列表 / 指标 / 走势）。
+2. **详情**：点某一行进入，卡片原地换成该项的细节 + 一个 `od-back` 返回。
+
+```html
+<button class="od-back" id="back">‹ 自选</button>
+<div class="od-range" id="range"><button data-r="1D" aria-pressed="true">1D</button>…</div>
+```
+
+```js
+// 交互后立刻写回；Host 是浅合并，多个状态键互不覆盖
+window.dshWidget.save({ focus: 'NVDA', range: '1M' });
+```
+
+**让刷新不跳回总览**：采集器读一次 `data/state.json`，把内容放进取数结果的
+`saved` 字段；视图启动时只应用一次。这样重启 DSH 后还停在你上次看的那只票上。
+
+**切时间窗要瞬时**：把 1D / 1W / 1M / 1Y 的序列一次性取回来（长跨度可以按周 / 月聚合），
+在视图里切片；不要每切一次就发请求。
 
 ## 硬规则（宿主 lint 会检查）
 

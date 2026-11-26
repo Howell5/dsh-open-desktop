@@ -536,3 +536,58 @@ a.od-row-wrap:hover .od-row-label {
   opacity: 0.1;
   stroke: none;
 }
+
+/* ---------------------------------------------------------------- 切片控件
+   同一份数据的「另一个切片」用同一套控件：时间窗、分组、排序方向。
+   卡片里用 <div class="od-range"><button aria-pressed="true">…</button></div>，
+   状态交给 aria-pressed，不用自己写选中样式。 */
+
+.od-range {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--od-r-control, 8px);
+  background: var(--od-surface-2);
+}
+
+.od-range > button {
+  flex: 1 1 0;
+  height: 17px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--od-fg-3);
+  font: inherit;
+  font-size: var(--od-text-xs, 11px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .12s ease, color .12s ease;
+}
+
+.od-range > button:hover { color: var(--od-fg); }
+
+.od-range > button[aria-pressed="true"] {
+  background: var(--od-bg);
+  color: var(--od-fg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .18);
+}
+
+/* 从一层进入另一层的唯一返回控件；焦点态存在卡片自己的 data/state.json 里。 */
+.od-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  height: 18px;
+  padding: 0 7px 0 3px;
+  border: 0;
+  border-radius: var(--od-r-control, 8px);
+  background: color-mix(in srgb, var(--od-blue) 12%, transparent);
+  color: var(--od-blue);
+  font: inherit;
+  font-size: var(--od-text-xs, 11px);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.od-back:hover { background: color-mix(in srgb, var(--od-blue) 22%, transparent); }

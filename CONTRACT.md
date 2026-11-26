@@ -66,7 +66,14 @@
 `design` 是注入每个 iframe 的设计系统（`theme.css` + `runtime.js`），由 Host 在启动时读取一次。
 板面和会话预览共享同一个客户端 store；SSE 与轮询更新同一份状态。返回板面的定位请求只保存在客户端，不修改 Host 的 `openAt`，避免重新打开会话。
 
-`card-data` 是卡片 view 的交互状态写回：`value` 必须是 JSON、序列化后 ≤64KB，Host 原子写入 `cards/<id>/data/state.json` 并触发这张卡刷新。view 里用 `window.dshWidget.save(value)` 调用；只允许写这张卡自己的 `data/`，不暴露任意路径。待办、清单这类需要增删改的卡片用它持久化。
+`card-data` 是卡片 view 的交互状态写回，语义是**浅合并**：
+
+- `value` 必须是 JSON；与已有的 `data/state.json` 逐键合并，不整体覆盖。同一张卡可以同时存时间窗、选中项、勾选状态，各自 save 自己那几个键。
+- 合并后序列化 ≤64KB，Host 原子写入 `cards/<id>/data/state.json`。
+- **不触发重新取数**：视图刚改完状态，本地已是新的；再跑一遍采集只会让点击变慢，还可能用旧快照覆盖视图。
+- view 里用 `window.dshWidget.save(value)` 调用；只允许写这张卡自己的 `data/`，不暴露任意路径。
+
+需要跨重启恢复的卡片（例如个股详情停在 NVDA 1M），由采集器读一次 `data/state.json`，把内容回显到取数结果的 `saved` 字段，视图启动时只应用一次。
 
 ## 4. 工作区、目录与权限
 
