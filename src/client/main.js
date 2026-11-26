@@ -1847,9 +1847,10 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
         prompt: '做一个汇率卡片：显示 USD 兑 CNY、EUR、JPY 的当前汇率和今日涨跌。优先用 frankfurter.dev 的免费接口，不需要 key；失败时用上次成功的缓存并标注数据陈旧。涨绿跌红。',
       },
       {
-        id: 'stocks', category: 'money', title: '自选股', size: { w: 4, h: 7 }, schedule: every(300_000),
-        blurb: '港股、美股，一屏看完',
-        prompt: '做一个自选股卡片：默认关注腾讯 00700、泡泡玛特 09992、英伟达 NVDA（把代码换成你的）。显示现价、涨跌幅、今开、昨收。用腾讯行情接口 qt.gtimg.cn，不需要 key，请求时带 Referer: https://gu.qq.com/。涨绿跌红，失败时显示缓存并标注陈旧。',
+        id: 'stocks', category: 'money', title: '自选股', size: { w: 6, h: 6 }, schedule: every(300_000),
+        blurb: '点进去看个股，六个时间窗',
+        prompt: '做一个自选股卡片（6×6）：顶部一只大图（名称、现价、涨跌、走势），下面其余每只一行；点一只进详情看走势，能切 1D/1W/1M/1Y/5Y/10Y；右上角 ＋ 能搜索并添加自选股。默认放腾讯 00700、泡泡玛特 09992、英伟达 NVDA（换成你关注的）。',
+        spec: '实现规格（照做，不要换接口，也不要自己发明数据源）：\n\n【采集器】用 Python 写在卡片目录，用 command 刷新，stdout 输出一份 JSON。\n1) 实时报价 https://qt.gtimg.cn/q=hk00700,usNVDA 。返回 GBK，必须按 gbk 解码；\n   形如 v_hk00700="..."，按 ~ 切开后：1=名称 3=现价 4=昨收 5=今开 32=涨跌% 33=最高 34=最低。\n   写代码前先请求一次打印字段核对，别靠猜。\n2) 港股日/周/月线 https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=hk00700,day,,,260,qfq\n   把 day 换成 week / month；取 data[code].qfqday（或 day），每项 [日期,开,收,高,低,量]。\n3) 港股当日分时 https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=hk00700 ，\n   data[code].data.data 每行形如 "0931 337.40"。\n4) 美股日线 https://api.nasdaq.com/api/quote/NVDA/historical?assetclass=stocks&limit=4000&fromdate=2025-01-01\n   必须带 Accept: application/json 和 Referer: https://www.nasdaq.com/ ；\n   data.tradesTable.rows 里 date 是 11/24/2026、close 带 $，转成 ISO 日期并倒序。\n5) 美股分时 https://stock.finance.sina.com.cn/usstock/api/jsonp.php/var%20_NVDA_=/US_MinKService.getMinK?symbol=NVDA&type=5\n   从括号里取 JSON 数组，每项 {d,c}。\n6) 搜索 https://searchapi.eastmoney.com/api/suggest/get?input=腾讯&type=14&token=D43BF722C8E33BDC906FB84D85E326E8&count=8\n   返回 UTF-8 JSON，QuotationCodeTable.Data 里取 Code / Name / SecurityTypeName，\n   只保留 SecurityTypeName 含「港股」或「美股」的。腾讯的搜索接口是 GBK，卡片里 dshWidget.fetch\n   只能按 UTF-8 解码，中文名会变乱码，所以搜索必须用这个接口。\n\n输出形状：{market, stamp, quotes:[{code,name,market,price,prev,open,high,low,pct,\nintra:{t,v}, daily:{d,v}, weekly:{d,v}, monthly:{d,v}}], saved}\n日线留 260 根、周线 260 根、月线 120 根；分时抽样到不超过 96 点，但必须保留当日最高和最低那两个点。\n一次全取回并缓存 15 分钟，视图切时间窗时不许再发请求。取数失败时回退上一次成功的快照并标 stale。\n\n【自选股】读 data/state.json 的 pins（[{code,market,name}]）；有 pins 就以它为准（哪怕是空数组），\n没有才用默认几只。校验：港股 5 位数字、美股 1-5 位大写字母，不合法的丢掉。\n\n【视图】6×6，两层，卡片原地切换：\n- 总览：顶部一只大图（名称、代码、大号现价、涨跌、走势线），下面其余每只一行\n  （名称+代码、迷你走势、价格、涨跌）；点任意一行进入详情。\n- 详情：名称/代码、大号价格、涨跌；用 .od-range 做 1D/1W/1M/1Y/5Y/10Y；\n  一条面积曲线，涨绿跌红；1D 的纵轴直接用当日最高/最低（让图上标注和下面统计一致），\n  其它档位用区间最高/最低；底部四个统计：1D 是今开/昨收/最高/最低，\n  其它是区间高/区间低/涨跌/振幅，5Y/10Y 把振幅换成年化。用 .od-back 返回总览。\n  切换时间窗在本地切片，零请求、零 loading。\n- 右上角 ＋ 打开搜索面板：输入调第 6 个接口，点结果加入自选，调用\n  window.dshWidget.save({pins}, {refresh:true})；面板里同时列出已自选，支持点 × 移除。\n- 当前选中和时间窗用 save({focus, range}) 存；采集器把 data/state.json 的其余内容回显到 saved，\n  视图启动时应用一次，重启后停在同一只、同一时间窗。\n- 颜色只用 --od-* token，字号不小于 11px，不引外链资源。\n\n完成前逐条自检并在回复里确认：点行能进能回；六个时间窗都有曲线且切换不发请求；\n搜索能加能删；重启后停在同一只同一天期。',
       },
       {
         id: 'indices', category: 'money', title: '全球指数', size: { w: 4, h: 6 }, schedule: every(300_000),
@@ -2090,7 +2091,8 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
             onClick: function () {
               if (atLimit) { props.onLimit(); return; }
               const scene = SCENES.find(function (item) { return item.id === sceneId; });
-              props.onCreate(composePrompt(text, schedule), scene ? scene.title : '', scene ? scene.size : undefined);
+              const spec = scene && scene.spec ? '\n\n' + scene.spec : '';
+              props.onCreate(composePrompt(text + spec, schedule), scene ? scene.title : '', scene ? scene.size : undefined);
             },
           }, props.busy ? '创建中…' : '创建'),
         ],
@@ -2103,7 +2105,7 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
             'data-on': categoryId === cat.id ? 'true' : 'false',
             'aria-selected': categoryId === cat.id ? 'true' : 'false',
             title: cat.blurb,
-            onClick: function () { setCategoryId(cat.id); },
+            onClick: function () { setCategoryId(cat.id); setSceneId(''); },
           }, cat.title);
         })),
         h('div', { className: 'od-scenes' }, scenes.map(function (scene) {
