@@ -56,7 +56,7 @@ $DSH_HOME/open-desktop/
 ```bash
 npm install
 npm run build        # src/client/ → client.js（esbuild，react 由宿主注入）
-npm test             # 217 条测试
+npm test             # 218 条测试
 npm run harness      # 可选：普通浏览器里的拖拽验证台
 ```
 
