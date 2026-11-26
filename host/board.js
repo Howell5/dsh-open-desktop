@@ -146,7 +146,7 @@ export function createBoard({ ctx, paths, cards, refresh, sessions }) {
   // 交互状态：卡片 view 通过 dshWidget.save(value) 写回自己的 data/state.json。
   // 语义是「浅合并」而不是覆盖：同一张卡可能同时存时间窗、选中项、勾选状态，
   // 各自 save 自己那几个键，不能互相抹掉。只允许落在这张卡片的 data/ 下。
-  const writeData = async ({ id, value } = {}) => {
+  const writeData = async ({ id, value, refetch } = {}) => {
     const card = requireCard(id)
     const dir = join(paths.cardDir(card.id), 'data')
     const file = join(dir, 'state.json')
@@ -171,9 +171,13 @@ export function createBoard({ ctx, paths, cards, refresh, sessions }) {
     const temp = file + '.tmp'
     await writeFile(temp, text, 'utf8')
     await rename(temp, file)
-    // 不在这里重新取数：卡片自己刚改完状态，本地已经是新的；
-    // 再触发一次网络刷新只会让点击变慢，还可能用旧快照覆盖视图。
+    // 默认不重新取数：卡片自己刚改完状态，本地已经是新的；
+    // 再跑一遍采集只会让点击变慢，还可能用旧快照覆盖视图。
+    // 但「改了自选股/订阅列表」这类改动，数据本身要重取，view 传 refetch 才跑。
     publish()
+    if (refetch === true) {
+      refreshNow({ id: card.id }).catch(() => { /* 失败会走卡片自己的陈旧态 */ })
+    }
     return { written: true, bytes }
   }
 

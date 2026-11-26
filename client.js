@@ -5325,7 +5325,7 @@ window.__ModuleLoader__.load({
       const csp = "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'";
       const runtime = `(function(){
             function applyTokens(tokens){if(!tokens)return;var root=document.documentElement;for(var key in tokens){root.style.setProperty("--od-"+key,tokens[key])}}
-            window.dshWidget={data:null,tokens:{},size:{w:0,h:0},save:function(value){parent.postMessage({__od:true,type:"save",value:value},"*")},fetch:function(url,init){var id="f"+Math.random().toString(36).slice(2);return new Promise(function(resolve,reject){function onMessage(event){var message=event.data||{};if(message.__od!==true||message.type!=="fetch-result"||message.id!==id)return;window.removeEventListener("message",onMessage);if(message.ok)resolve(message.value);else reject(new Error(message.error||"fetch failed"))}window.addEventListener("message",onMessage);parent.postMessage({__od:true,type:"fetch",id:id,url:String(url),init:init||null},"*")})}};
+            window.dshWidget={data:null,tokens:{},size:{w:0,h:0},save:function(value,options){parent.postMessage({__od:true,type:"save",value:value,options:options||null},"*")},fetch:function(url,init){var id="f"+Math.random().toString(36).slice(2);return new Promise(function(resolve,reject){function onMessage(event){var message=event.data||{};if(message.__od!==true||message.type!=="fetch-result"||message.id!==id)return;window.removeEventListener("message",onMessage);if(message.ok)resolve(message.value);else reject(new Error(message.error||"fetch failed"))}window.addEventListener("message",onMessage);parent.postMessage({__od:true,type:"fetch",id:id,url:String(url),init:init||null},"*")})}};
             function report(){try{var d=document.documentElement;var b=document.body;var sh=Math.max(d?d.scrollHeight:0,b?b.scrollHeight:0);var ch=window.innerHeight||(d?d.clientHeight:0);parent.postMessage({__od:true,type:"overflow",scrollHeight:sh,clientHeight:ch},"*")}catch(error){}}
             window.addEventListener("message",function(event){var message=event.data||{};if(message.__od!==true)return;if(message.type==="hello"){parent.postMessage({__od:true,type:"ready"},"*");return}if(message.type==="tokens"){window.dshWidget.tokens=message.tokens||{};applyTokens(message.tokens);return}if(message.type==="data"){if(message.tokens)applyTokens(message.tokens);if(message.size)window.dshWidget.size=message.size;window.dshWidget.data=message.value;if(typeof window.dshWidget.onData==="function")window.dshWidget.onData(message.value);report()}});
             document.addEventListener("click",function(event){var target=event.target;var link=target&&target.closest?target.closest("a[href]"):null;if(!link)return;var href=link.getAttribute("href")||"";if(!/^https?:\\/\\//i.test(href))return;event.preventDefault();parent.postMessage({__od:true,type:"open",url:href},"*")},true);
@@ -5419,7 +5419,7 @@ window.__ModuleLoader__.load({
             return;
           }
           if (message.type === "save") {
-            if (typeof props.onSave === "function") props.onSave(message.value);
+            if (typeof props.onSave === "function") props.onSave(message.value, message.options || null);
             return;
           }
           if (message.type === "fetch") {
@@ -5655,8 +5655,8 @@ window.__ModuleLoader__.load({
         onGrow: function(item) {
           props.onGrow?.(item);
         },
-        onSave: function(value) {
-          props.onSave?.(widget.id, value);
+        onSave: function(value, options) {
+          props.onSave?.(widget.id, value, options);
         }
       });
     }
@@ -7713,8 +7713,12 @@ window.__ModuleLoader__.load({
               });
             },
             onMove: moveWidget,
-            onSave: function(id, value) {
-              run("card-data", { id, value }).catch(function() {
+            onSave: function(id, value, options) {
+              run("card-data", {
+                id,
+                value,
+                refetch: !!(options && options.refresh === true)
+              }).catch(function() {
               });
             }
           })
