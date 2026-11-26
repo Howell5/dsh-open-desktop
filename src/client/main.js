@@ -1782,9 +1782,10 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
     const SCENES = [
       // 今天
       {
-        id: 'weather', category: 'today', title: '天气 · 今天穿什么', size: { w: 4, h: 7 }, schedule: every(3_600_000),
-        blurb: '降水、体感、紫外线，顺手告诉你带不带伞',
-        prompt: '做一个天气卡片：默认上海（把上海换成你的城市）。显示当前温度、体感温度、天气状况、今天最高最低和未来三天预报，再给一句「今天要不要带伞」的判断（降水概率达到 40% 就提醒带伞）。用 Open-Meteo 的免费接口，不需要 API key。取数失败时显示上次成功的数据并标注数据陈旧。',
+        id: 'weather', category: 'today', title: '天气 · 今天穿什么', size: { w: 3, h: 6 }, schedule: every(3_600_000),
+        blurb: '当前 + 三天预报，一屏看完',
+        prompt: '做一个天气卡片（3×6）：上半是当前温度、天气、体感、今日最高最低；下半是三天预报（周几 + 最高/最低）。城市默认上海，换成你的。',
+        spec: '实现规格（照做，不要换接口）：\n\n【采集器】Python，用 command 刷新（每小时）。请求：\nhttps://api.open-meteo.com/v1/forecast?latitude=31.2304&longitude=121.4737\n&current=temperature_2m,apparent_temperature,is_day,weather_code,relative_humidity_2m,wind_speed_10m\n&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max\n&forecast_days=4&timezone=Asia%2FShanghai\n（经纬度和时区换成用户的城市）。返回 UTF-8 JSON，不需要 key。\n\nWMO weather_code 转中文：0 晴 / 1 晴间多云 / 2 多云 / 3 阴 / 45,48 雾 / 51,53,55 毛毛雨 /\n56,57 冻雨 / 61 小雨 / 63 中雨 / 65 大雨 / 66,67 冻雨 / 71,73,75 雪 / 77 雪粒 /\n80,81,82 阵雨 / 85,86 阵雪 / 95 雷阵雨 / 96,99 雷暴冰雹。\n\n输出：{place, generatedAt, clock:"HH:MM", current:{temp,feels,text,code,humidity,wind,isDay},\ntoday:{high,low}, forecast:[{date,weekday:"周四",high,low,code,text,pop}] 三条（取 daily 的第 2~4 天）}\n\n【视图】3×6，卡片很窄（约 300px），必须放得下：\n- 上半：城市 + 更新时间；大号温度（18）+ 摄氏度；右侧一列三行小字：体感 / 最高 / 最低。\n- 下半：三列预报，每列 周几 + 天气文字 + 「18° / 9°」。\n- 不滚动、不溢出；字号不小于 11px；颜色只用 --od-* token。不需要交互。',
       },
       {
         id: 'air', category: 'today', title: '空气质量', size: { w: 4, h: 6 }, schedule: every(3_600_000),
@@ -1802,9 +1803,10 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
         prompt: '做一个「未来 7 天带伞日历」卡片：默认上海。列出未来 7 天每天的最高温、最低温和降水概率，降水概率达到 40% 的那天标出来并写「带伞」。用 Open-Meteo 免费接口。整张卡要能一眼扫完，不要做成密集表格。',
       },
       {
-        id: 'clock', category: 'today', title: '世界时钟', size: { w: 6, h: 5 }, schedule: every(60_000),
-        blurb: '上海、东京、纽约、伦敦，谁在白天',
-        prompt: '做一个世界时钟卡片：显示上海、东京、纽约、伦敦的当前时间和日期，并标出哪些城市是白天、哪些是夜晚。纯本地计算，不需要网络。默认这四个城市，用户可以在 prompt 里改。',
+        id: 'clock', category: 'today', title: '世界时钟', size: { w: 3, h: 6 }, schedule: every(60_000),
+        blurb: '四个城市，谁在半夜',
+        prompt: '做一个世界时钟卡片（3×6）：2×2 四个城市，每格显示城市名、当地时间、日期和星期，并标出白天还是夜晚。城市默认上海、东京、纽约、伦敦。',
+        spec: '实现规格（不需要网络；如果行为模板 clock，直接用它的数据，否则在视图里自己算）：\n\n【视图】3×6，2×2 四个城市：\n- 城市 → IANA 时区：上海 Asia/Shanghai、东京 Asia/Tokyo、纽约 America/New_York、伦敦 Europe/London。\n  用 Intl.DateTimeFormat(\'zh-CN\', { timeZone, hour12: false, hour:\'2-digit\', minute:\'2-digit\' }) 取时间，\n  再用 month/day/weekday 取日期和星期。\n- 每格：城市名 + UTC 偏移（如 UTC+8，可用 timeZoneName:\'shortOffset\' 取）、大号时间（HH:MM）、\n  下面一行「11/26 周四」。\n- 6:00–18:00 算白天：显示太阳图标并写「白天」；否则月亮图标写「夜晚」。用文字即可，不要引图片。\n- 每 10 秒用 setInterval 重算一次，不要重新加载页面。刷新间隔设 60000。\n- 四个格子等分，不滚动不溢出；时间字号用最大的一档但不能撑破宽度。',
       },
 
       // 工作
@@ -1814,9 +1816,10 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
         prompt: '做一个服务健康卡片：默认检查 https://example.com 和 http://127.0.0.1:5434（把地址换成你自己的）。显示每个地址是否可访问、HTTP 状态码、响应耗时；某个地址连不上只把那一行标红，其它行照常显示，不要整张卡报错。用命令行 curl，单个请求超时 5 秒。',
       },
       {
-        id: 'system', category: 'work', title: '本机资源', size: { w: 4, h: 7 }, schedule: every(30_000),
-        blurb: 'CPU、内存、磁盘、电池',
-        prompt: '做一个本机状态卡片（macOS）：CPU 占用、内存使用、磁盘剩余、电池电量和是否在充电。用 vm_stat、df、pmset 这些本机命令，不需要任何外部接口。磁盘剩余低于 10% 或电量低于 20% 时标红。',
+        id: 'system', category: 'work', title: '本机资源', size: { w: 6, h: 6 }, schedule: every(30_000),
+        blurb: 'CPU / 内存 / 磁盘 / 电池，点开看进程',
+        prompt: '做一个本机资源卡片（6×6）：CPU、内存、磁盘可用、电池四个仪表；点 CPU 或内存，能看到占用最高的 5 个进程。只用 macOS 自带命令，不联网。',
+        spec: '实现规格（照做，只用 macOS 自带命令，不访问网络）：\n\n【采集器】Python，用 command 刷新（30 秒），stdout 输出 JSON。任何一路失败都不要整份报错。\n- CPU：`top -l 1 -n 0 -s 0` 里 "CPU usage: x% user, y% sys, z% idle" → percent = 100 - idle；\n  负载取 `sysctl -n vm.loadavg` 的第一个数。\n- 内存：`sysctl -n hw.memsize` 得总量；`vm_stat` 里 Pages active + wired + compressed 换算成已用 GB；\n  percent = 已用 / 总量。\n- 磁盘：`df -k /System/Volumes/Data` 取 剩余KB 和 总KB → freeGB / totalGB / freePercent。\n- 电池：`pmset -g batt` 解析百分比和状态（charging / AC attached / battery）。\n- 系统版本：`sw_vers -productName -productVersion`。\n- 进程（一次 ps 约 50ms，直接采集进数据，不要做成按需接口）：\n  `ps -Ao pid=,pcpu=,rss=,comm= -r` 取前 5 个 = 按 CPU；把 -r 换成 -m = 按内存。\n  comm 取 basename；rss 单位是 KB，换算成 MB。\n\n输出：{updatedAt, os, cpu:{percent,load}, memory:{percent,usedGB,totalGB},\ndisk:{freeGB,totalGB,freePercent}, battery:{percent,charging,acPower,onBattery},\nprocs:{cpu:[{pid,name,cpu,mb}] 五条, mem:[{...}] 五条}, saved}\n\n【视图】6×6，两层：\n- 总览：2×2 四个仪表（CPU 占用 / 内存使用 / 磁盘可用 / 电池），每格 标签 + 大号百分比 + 一行小字 + 进度条。\n  CPU 高于 65% 标黄、85% 标红；磁盘剩余低于 20% 标黄、10% 标红；电量低于 40% 标黄、20% 标红。\n  CPU 和内存两格可点（标签右侧一个 ›），点进详情。\n- 详情：标题 + 小字（负载 / 已用 GB）+ 右侧大号百分比；下面 5 行进程：序号、名称、占比条、数值\n  （CPU 档显示百分比，内存档显示 MB 或 GB）。用 .od-back 返回。\n- 状态：save({focus:"cpu"|"mem"|null})；采集器把 data/state.json 其余内容回显到 saved，启动时应用一次。',
       },
       {
         id: 'docker', category: 'work', title: 'Docker 容器', size: { w: 5, h: 7 }, schedule: every(30_000),
@@ -1836,21 +1839,29 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
 
       {
         id: 'todo', category: 'work', title: '待办清单', size: { w: 5, h: 6 }, schedule: every(300_000),
-        blurb: '像 iOS 提醒事项一样勾选、增删改',
-        prompt: '做一个待办清单卡片，像 iOS 提醒事项：圆形勾选框、完成划线、发丝线分行、底部输入框。数据存在 data/state.json，结构为 {"items":[{"id":1,"text":"...","done":false,"tag":"今天"}]}；首次创建时写入空列表。用 window.dshWidget.data 读取，新增/勾选/删除/双击编辑后调用 window.dshWidget.save({items})。不要用 localStorage（沙箱不允许）。调 card_set_refresh 时传 file="data/state.json"、everyMs=300000。',
+        blurb: '像提醒事项，勾选、增删、双击改',
+        prompt: '做一个待办清单卡片（5×6），像 iOS 提醒事项：圆形勾选、完成划线、发丝线分行、底部能加；勾选、新增、双击编辑、删除都要真的存下来，重开还在。',
+        spec: '实现规格（照做）：\n\n【数据】唯一数据源是 data/state.json，形状 {"items":[{"id":1,"text":"…","done":false,"tag":"今天"}]}。\n- 用 card_set_refresh 配 file="data/state.json"、everyMs=300000。\n- 每次增删改后调用 window.dshWidget.save({items}) 写回；不要用 localStorage（沙箱不允许）。\n- 文件不存在时显示空列表并提示「点 + 添加」，不要报错。\n\n【视图】5×6，像 iOS 提醒事项：\n- 顶部一行：左边「已完成 / 总数」（如 2 / 4），右边一个圆形 ＋ 按钮。\n- 每行：左侧圆形勾选框（未完成空心圈；完成是蓝底白勾）、中间文字（完成后变灰加删除线）、\n  右侧 tag 小字、hover 出现 × 删除。行之间发丝线分隔。\n- 双击文字原地变成输入框编辑，回车保存、Esc 取消。\n- 点 ＋ 在底部展开一行输入框（回车或「添加」提交，Esc 收起）。\n- 按卡片高度最多显示 N 行，放不下的在底部小字提示「还有 M 项」。\n- 颜色只用 --od-* token，字号不小于 11px，不溢出。',
+      },
+      {
+        id: 'commit', category: 'work', title: 'GitHub 活跃', size: { w: 4, h: 6 }, schedule: every(900_000),
+        blurb: '提交、连续天数、最活跃的仓库',
+        prompt: '做一个 GitHub 活跃卡片（4×6）：总览看近 7 / 30 / 90 天提交数和连续活跃天数，下面列出最活跃的 3 个仓库；点一个仓库进详情，看它 13 周的提交柱状、7/30/90 天数字和最后一次提交。',
+        spec: '实现规格（照做，不要换接口）：\n\n【采集器】Python，用 command 刷新（15 分钟）。认证用本机已登录的 gh：\ntoken = subprocess.run(["gh","auth","token"], capture_output=True, text=True).stdout.strip()\n\n查询用 GraphQL（POST https://api.github.com/graphql，Authorization: bearer <token>）：\n1) query { viewer { login id } }\n2) 先查 repositories(ownerAffiliations:[OWNER], first:100, orderBy:{field:PUSHED_AT,direction:DESC}) {\n     totalCount nodes { nameWithOwner isPrivate stargazerCount primaryLanguage{name}\n       issues(states:OPEN){totalCount} }\n   }\n   然后对最近推送的（最多 30 个）仓库用别名 r0..r29 一次性查提交：\n   r0: repository(owner:"…", name:"…") { defaultBranchRef { target { ... on Commit {\n     history(first:100, since:"<90天前ISO>", author:{id:"<viewer id>"}) {\n       nodes { committedDate messageHeadline } } } } } }\n   一次请求最多 30 个别名；字段太多就分两次。\n\n统计（按本机时区的自然日）：\n- 每天提交数 day_counts；commits7 / commits30 / commits90 和 prev7 / prev30（各自往前推一个窗口）。\n- 连续活跃天数 streak（今天没提交就从昨天往前数）；bestStreak 取近 13 周内最长。\n- 每个仓库 13 个自然周的提交数 hist[]，以及 c7 / c30 / c90、最后一次提交的 messageHeadline 和时间。\n\n输出：{account:{login}, metrics:{commits7,prev7,commits30,prev30,commits90,streak,bestStreak,\nactiveRepos30,activeRepos90,totalRepos,openPRs,openIssues},\nweeks:[{d,n}] 13 条, days:[{d,n}] 90 条,\nrepos:[{name,full,private,lang,stars,issues,c7,c30,c90,last,msg,hist:[13]}] 按 c30 降序最多 20 个,\ngeneratedAt, saved}\n\n【视图】4×6，两层：\n- 总览：.od-range 做 7D / 30D / 90D；大数字是该区间提交数，旁边是相对上一窗口的涨跌百分比\n  （90D 没有上一窗口，改显示日均）；右侧「N 天连续」；下面一条按天柱状（7 / 30 / 90 根）；\n  再下面最活跃的 3 个仓库，每行 名称 + 语言 + 迷你走势 + 该区间提交数。点仓库行进详情。\n- 详情：仓库名 + 语言 / 私有 / ★ / issue；三格数字（近 7 / 30 / 90 天）；13 周柱状；\n  底部「最后提交 · N 分钟前」+ 提交信息。用 .od-back 返回。\n- 状态：save({focus, range})；采集器把 data/state.json 其余内容回显到 saved，启动时应用一次。\n另外：总览里三个仓库行必须全部完整可见，不许被裁；详情里三格数字 + 柱状 + 底部三块加起来必须不超过 224px，柱状的轴标签不要和底部文字重叠。',
       },
 
       // 钱
       {
-        id: 'fx', category: 'money', title: '美元汇率', size: { w: 4, h: 6 }, schedule: every(300_000),
-        blurb: 'USD 兑人民币、欧元、日元',
-        prompt: '做一个汇率卡片：显示 USD 兑 CNY、EUR、JPY 的当前汇率和今日涨跌。优先用 frankfurter.dev 的免费接口，不需要 key；失败时用上次成功的缓存并标注数据陈旧。涨绿跌红。',
+        id: 'fx', category: 'money', title: '美元汇率', size: { w: 6, h: 6 }, schedule: every(300_000),
+        blurb: '点进去看走势，还能换算',
+        prompt: '做一个汇率卡片（6×6）：总览是「1 单位基准币 = ?」，能切换 USD / CNY / EUR / JPY 基准，每行一个货币对带走势；点一行进详情看当日曲线、今日和今年区间，还有一个换算器。',
+        spec: '实现规格（照做，不要换接口）：\n\n【采集器】Python，用 command 刷新（15 分钟）。三个货币对逐个请求：\nhttps://query1.finance.yahoo.com/v8/finance/chart/USDCNY=X?interval=15m&range=1d&includePrePost=false\n（symbol 换成 USDEUR=X、USDJPY=X）。返回 UTF-8 JSON：\n- chart.result[0].meta 里有 regularMarketPrice、chartPreviousClose、regularMarketDayHigh、\n  regularMarketDayLow、fiftyTwoWeekHigh、fiftyTwoWeekLow\n- chart.result[0].timestamp[] 和 indicators.quote[0].close[] 是当日分时（null 要去掉）\nYahoo 返回 403 / 429 时不要反复重试：直接回退 Frankfurter —— https://api.frankfurter.dev/v1/latest?base=USD&symbols=CNY,EUR,JPY 取最新价，再用 https://api.frankfurter.dev/v1/2026-11-01..?base=USD&symbols=... 取近 30 天日线当 spark。回退时 dayHigh / dayLow 置 null，视图把「今日」写成「无分时」，曲线标题写「日更 · 近月日线」，并在卡片底部标出数据源和日期——不要假装是分时。\n\n输出：{base:"USD", source, quotes:[{code:"CNY", name:"人民币", rate, prev, changePct,\ndayHigh, dayLow, yearHigh, yearLow, spark:[…]}], generatedAt, saved}\nCNY / EUR / JPY 三个 code 固定，名称用中文。\n\n【视图】6×6，两层。所有基准切换都在本地算，不再发请求：\n- 交叉汇率 rate(base→target) = usd[target] / usd[base]，usd["USD"] = 1；涨跌用 prev 同法算。\n- 交叉分时把两个 spark 逐点相除；交叉区间：high = target.high / base.low，low = target.low / base.high。\n- 精度：汇率 ≥100 显示 2 位，否则 4 位；-0.00% 归一成 0.00%，|涨跌| < 0.005% 按持平（灰色）。\n- 总览：顶部 .od-range 做基准切换（USD / CNY / EUR / JPY）；下面每个非基准货币一行：\n  货币对写成「基准/目标」，例如基准 USD 时写 USD/CNY，数值 = 1 USD 等于多少 CNY（不是反过来）。每行：货币对 + 中文名 + 迷你走势 + 汇率 + 涨跌。点行进详情。\n- 详情：货币对 + 中文名 + 大号汇率 + 涨跌；当日面积曲线；两行区间（今日 低–高、今年 低–高）；\n  底部换算器：一个数字输入框（默认 1000，单位 = 基准币）+「=」+ 结果（2 位小数、千分位）。\n- 状态：save({focus, base, amount})；采集器把 data/state.json 其余内容回显到 saved，启动时应用一次。',
       },
       {
         id: 'stocks', category: 'money', title: '自选股', size: { w: 6, h: 6 }, schedule: every(300_000),
         blurb: '点进去看个股，六个时间窗',
         prompt: '做一个自选股卡片（6×6）：顶部一只大图（名称、现价、涨跌、走势），下面其余每只一行；点一只进详情看走势，能切 1D/1W/1M/1Y/5Y/10Y；右上角 ＋ 能搜索并添加自选股。默认放腾讯 00700、泡泡玛特 09992、英伟达 NVDA（换成你关注的）。',
-        spec: '实现规格（照做，不要换接口，也不要自己发明数据源）：\n\n【采集器】用 Python 写在卡片目录，用 command 刷新，stdout 输出一份 JSON。\n1) 实时报价 https://qt.gtimg.cn/q=hk00700,usNVDA 。返回 GBK，必须按 gbk 解码；\n   形如 v_hk00700="..."，按 ~ 切开后：1=名称 3=现价 4=昨收 5=今开 32=涨跌% 33=最高 34=最低。\n   写代码前先请求一次打印字段核对，别靠猜。\n2) 港股日/周/月线 https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=hk00700,day,,,260,qfq\n   把 day 换成 week / month；取 data[code].qfqday（或 day），每项 [日期,开,收,高,低,量]。\n3) 港股当日分时 https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=hk00700 ，\n   data[code].data.data 每行形如 "0931 337.40"。\n4) 美股日线 https://api.nasdaq.com/api/quote/NVDA/historical?assetclass=stocks&limit=4000&fromdate=2025-01-01\n   必须带 Accept: application/json 和 Referer: https://www.nasdaq.com/ ；\n   data.tradesTable.rows 里 date 是 11/24/2026、close 带 $，转成 ISO 日期并倒序。\n5) 美股分时 https://stock.finance.sina.com.cn/usstock/api/jsonp.php/var%20_NVDA_=/US_MinKService.getMinK?symbol=NVDA&type=5\n   从括号里取 JSON 数组，每项 {d,c}。\n6) 搜索 https://searchapi.eastmoney.com/api/suggest/get?input=腾讯&type=14&token=D43BF722C8E33BDC906FB84D85E326E8&count=8\n   返回 UTF-8 JSON，QuotationCodeTable.Data 里取 Code / Name / SecurityTypeName，\n   只保留 SecurityTypeName 含「港股」或「美股」的。腾讯的搜索接口是 GBK，卡片里 dshWidget.fetch\n   只能按 UTF-8 解码，中文名会变乱码，所以搜索必须用这个接口。\n\n输出形状：{market, stamp, quotes:[{code,name,market,price,prev,open,high,low,pct,\nintra:{t,v}, daily:{d,v}, weekly:{d,v}, monthly:{d,v}}], saved}\n日线留 260 根、周线 260 根、月线 120 根；分时抽样到不超过 96 点，但必须保留当日最高和最低那两个点。\n一次全取回并缓存 15 分钟，视图切时间窗时不许再发请求。取数失败时回退上一次成功的快照并标 stale。\n\n【自选股】读 data/state.json 的 pins（[{code,market,name}]）；有 pins 就以它为准（哪怕是空数组），\n没有才用默认几只。校验：港股 5 位数字、美股 1-5 位大写字母，不合法的丢掉。\n\n【视图】6×6，两层，卡片原地切换：\n- 总览：顶部一只大图（名称、代码、大号现价、涨跌、走势线），下面其余每只一行\n  （名称+代码、迷你走势、价格、涨跌）；点任意一行进入详情。\n- 详情：名称/代码、大号价格、涨跌；用 .od-range 做 1D/1W/1M/1Y/5Y/10Y；\n  一条面积曲线，涨绿跌红；1D 的纵轴直接用当日最高/最低（让图上标注和下面统计一致），\n  其它档位用区间最高/最低；底部四个统计：1D 是今开/昨收/最高/最低，\n  其它是区间高/区间低/涨跌/振幅，5Y/10Y 把振幅换成年化。用 .od-back 返回总览。\n  切换时间窗在本地切片，零请求、零 loading。\n- 右上角 ＋ 打开搜索面板：输入调第 6 个接口，点结果加入自选，调用\n  window.dshWidget.save({pins}, {refresh:true})；面板里同时列出已自选，支持点 × 移除。\n- 当前选中和时间窗用 save({focus, range}) 存；采集器把 data/state.json 的其余内容回显到 saved，\n  视图启动时应用一次，重启后停在同一只、同一时间窗。\n- 颜色只用 --od-* token，字号不小于 11px，不引外链资源。\n\n完成前逐条自检并在回复里确认：点行能进能回；六个时间窗都有曲线且切换不发请求；\n搜索能加能删；重启后停在同一只同一天期。',
+        spec: '实现规格（照做，不要换接口，也不要自己发明数据源）：\n\n【采集器】用 Python 写在卡片目录，用 command 刷新，stdout 输出一份 JSON。\n1) 实时报价 https://qt.gtimg.cn/q=hk00700,usNVDA 。返回 GBK，必须按 gbk 解码；\n   形如 v_hk00700="..."，按 ~ 切开后：1=名称 3=现价 4=昨收 5=今开 32=涨跌% 33=最高 34=最低。\n   写代码前先请求一次打印字段核对，别靠猜。\n2) 港股日/周/月线 https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=hk00700,day,,,260,qfq\n   把 day 换成 week / month；取 data[code].qfqday（或 day），每项 [日期,开,收,高,低,量]。\n3) 港股当日分时 https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=hk00700 ，\n   data[code].data.data 每行形如 "0931 337.40"。\n4) 美股日线 https://api.nasdaq.com/api/quote/NVDA/historical?assetclass=stocks&limit=4000&fromdate=2025-01-01\n   必须带 Accept: application/json 和 Referer: https://www.nasdaq.com/ ；\n   data.tradesTable.rows 里 date 是 11/24/2026、close 带 $，转成 ISO 日期并倒序。\n5) 美股分时 https://stock.finance.sina.com.cn/usstock/api/jsonp.php/var%20_NVDA_=/US_MinKService.getMinK?symbol=NVDA&type=5\n   从括号里取 JSON 数组，每项 {d,c}。\n6) 搜索 https://searchapi.eastmoney.com/api/suggest/get?input=腾讯&type=14&token=D43BF722C8E33BDC906FB84D85E326E8&count=8\n   返回 UTF-8 JSON，QuotationCodeTable.Data 里取 Code / Name / SecurityTypeName，\n   只保留 SecurityTypeName 含「港股」或「美股」的。腾讯的搜索接口是 GBK，卡片里 dshWidget.fetch\n   只能按 UTF-8 解码，中文名会变乱码，所以搜索必须用这个接口。\n\n输出形状：{market, stamp, quotes:[{code,name,market,price,prev,open,high,low,pct,\nintra:{t,v}, daily:{d,v}, weekly:{d,v}, monthly:{d,v}}], saved}\n日线留 260 根、周线 260 根、月线 120 根；分时抽样到不超过 96 点，但必须保留当日最高和最低那两个点。\n一次全取回并缓存 15 分钟，视图切时间窗时不许再发请求。取数失败时回退上一次成功的快照并标 stale。\n\n【自选股】读 data/state.json 的 pins（[{code,market,name}]，market 固定大写 HK / US）；有 pins 就以它为准（哪怕是空数组），\n没有才用默认几只。校验：港股 5 位数字、美股 1-5 位大写字母，不合法的丢掉。\n\n【视图】6×6，两层，卡片原地切换：\n- 总览：顶部一只大图（名称、代码、大号现价、涨跌、走势线），下面其余每只一行\n  （名称+代码、迷你走势、价格、涨跌）；点任意一行进入详情。\n- 详情：名称/代码、大号价格、涨跌；用 .od-range 做 1D/1W/1M/1Y/5Y/10Y；\n  一条面积曲线，涨绿跌红；1D 的纵轴直接用当日最高/最低（让图上标注和下面统计一致），\n  其它档位用区间最高/最低；底部四个统计：1D 是今开/昨收/最高/最低，\n  其它是区间高/区间低/涨跌/振幅；5Y/10Y 的第四格改成「年化收益率」，算法固定为 (末期价/首期价)^(1/N)-1，N 取 5 或 10。用 .od-back 返回总览。\n  切换时间窗在本地切片，零请求、零 loading。\n- 右上角 ＋ 打开搜索面板：输入调第 6 个接口，点结果加入自选，调用\n  window.dshWidget.save({pins}, {refresh:true})；面板里同时列出已自选，支持点 × 移除。\n- 当前选中和时间窗用 save({focus, range}) 存；采集器把 data/state.json 的其余内容回显到 saved，\n  视图启动时应用一次，重启后停在同一只、同一时间窗。\n- 颜色只用 --od-* token，字号不小于 11px，不引外链资源。\n\n完成前逐条自检并在回复里确认：点行能进能回；六个时间窗都有曲线且切换不发请求；\n搜索能加能删；重启后停在同一只同一天期。',
       },
       {
         id: 'indices', category: 'money', title: '全球指数', size: { w: 4, h: 6 }, schedule: every(300_000),
@@ -1934,9 +1945,10 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
         prompt: '做一个 DNS 变更监控卡片：默认监控 berryon.ai 的 A 记录（改成你的域名）。第一次运行把当前解析结果存到 data/baseline.json，之后每次对比；如果解析结果变了，标红并显示新旧值。用 dig，不需要 key。',
       },
       {
-        id: 'status', category: 'assets', title: '服务商状态', size: { w: 5, h: 6 }, schedule: every(300_000),
-        blurb: 'GitHub、Cloudflare、OpenAI 挂了吗',
-        prompt: '做一个服务商状态卡片：显示 GitHub、Cloudflare、OpenAI 的当前服务状态。用各家 statuspage 的公开 JSON，例如 https://www.githubstatus.com/api/v2/status.json、https://www.cloudflarestatus.com/api/v2/status.json、https://status.openai.com/api/v2/status.json。正常显示绿色「正常」，异常显示黄色或红色和说明。不需要 key。',
+        id: 'status', category: 'assets', title: '服务商状态', size: { w: 3, h: 6 }, schedule: every(300_000),
+        blurb: 'GitHub / CF / OpenAI 挂没挂',
+        prompt: '做一个服务状态卡片（3×6）：GitHub、Cloudflare、OpenAI 三个服务，一眼看出谁挂了谁降级；点一行能看到它的事件说明。',
+        spec: '实现规格（照做，不要换接口）：\n\n【采集器】Python，用 command 刷新（5 分钟）。三个服务各请求一次 statuspage 公开 API：\n- GitHub      https://www.githubstatus.com/api/v2/summary.json\n- Cloudflare  https://www.cloudflarestatus.com/api/v2/summary.json\n- OpenAI      https://status.openai.com/api/v2/summary.json\n返回 JSON：{status:{indicator,description}, components:[{name,status}], incidents:[{name,status,impact,shortlink}]}。\nindicator 映射：none → up（正常）；minor → warn（部分降级）；major / critical → down（故障）。\n某一家请求失败只把那一行标成 unknown，不要整卡报错。\n\n输出：{generatedAt, summary:{tone,label,up,warn,down},\nservices:[{id,name,home,tone,state,description,detail,incidents:[{name,impact,shortlink}]}]}\ntone 取三者里最严重的；label 形如「2 项异常」；detail 用 status.description，有活动事件时用第一条事件名。\n\n【视图】3×6（很窄，约 300px）：\n- 顶部：左边状态点 + 总体结论（正常 / 1 项异常 / N 项故障），右边小字「2 正常 · 1 异常」。\n- 下面三行服务：名称 + 一行说明（超长省略）+ 右侧状态胶囊（正常 / 部分降级 / 故障，绿 / 黄 / 红）。\n- 点某一行 → 详情：该服务完整说明 + 最多 4 条事件（带影响级别），用 .od-back 返回。\n- 颜色只用 --od-* token，字号不小于 11px，不溢出。',
       },
       {
         id: 'secrets', category: 'assets', title: '敏感文件检查', size: { w: 5, h: 7 }, schedule: daily('10:00'),
