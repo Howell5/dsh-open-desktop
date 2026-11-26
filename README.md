@@ -1,5 +1,7 @@
 # Open Desktop
 
+[English](README.en.md) · 中文
+
 把 DeepSeek Harness 的中栏变成**可拖拽的数据卡片墙**。
 
 每张卡片不是静态组件，而是**一条真实 session 的持久展示位**：agent 在卡片目录里写代码（取数脚本、服务、前端），内容用 `view/` 里的 HTML/CSS/JS 在沙箱 iframe 中渲染。
@@ -61,6 +63,13 @@ npm run harness      # 可选：普通浏览器里的拖拽验证台
 ```
 
 `client.js` 是构建产物，不要直接改；改 `src/client/`。Host 代码在 `host/`。
+
+## 权限与安全
+
+- 卡片的取数命令是**你自己写进那张卡的 `card.json`** 的，插件本身不预置、不执行任何命令。
+- 没有遥测、没有统计上报、没有默认外联。
+- 卡片的网络请求走宿主代理，受 CSP 和每张卡自己的 capabilities 白名单约束；`view/` 里不能直连网络、不能加载外链资源。
+- 卡片想保存交互状态时，只能写自己目录下的 `data/state.json`（JSON，≤64KB），宿主不暴露任意路径。
 
 ## 兼容性
 
