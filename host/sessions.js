@@ -16,6 +16,8 @@ export const CARD_OPENING = [
   '1) card_read 看当前配置，读 view/README.md 了解设计系统和可用的 od-* 类；',
   '2) 数据：在卡片目录里写取数代码，然后 card_set_refresh 告诉 Host 如何刷新',
   '   （template 内置模板 / command 本机命令 / file 读文件 / url 请求接口，everyMs 控制间隔）；',
+  '   command 一律写绝对路径（解释器和脚本都写全，如 /usr/bin/python3 /绝对/路径/x.py），',
+  '   不要依赖 PATH 或当前目录——宿主一升级，环境变量就可能变，相对路径会静默失效；',
   '3) 展示：优先保留 view/ 里的默认视图，它按数据形状自动排版；需要特殊视觉再改 view/ 里的文件。',
   '   只用 --od-* token 和 od-* 组件类；不要写死颜色或小于 11px 的字号；不要外链资源；',
   '   尺寸预算（必须自己算，不要靠 overflow:hidden 藏住被裁的内容）：卡片四周留 13px padding，',

@@ -27,23 +27,33 @@ async function confine(ctx, argv, workspaceRoot) {
   return argv
 }
 
-export async function runCommand(ctx, commandLine, { workspaceRoot = '', timeoutMs = 8000 } = {}) {
+export async function runCommand(ctx, commandLine, { workspaceRoot = '', timeoutMs = 30_000 } = {}) {
   const parts = tokenize(commandLine)
   if (parts.length === 0) throw Object.assign(new Error('命令为空'), { code: 'bad-command' })
   const argv = await confine(ctx, parts, workspaceRoot)
+  const limit = Math.min(120_000, Math.max(1000, Number(timeoutMs) || 30_000))
   return new Promise((resolve, reject) => {
     execFile(
       argv[0],
       argv.slice(1),
       {
-        timeout: Math.min(60_000, Math.max(1000, Number(timeoutMs) || 8000)),
+        timeout: limit,
         maxBuffer: 512 * 1024,
         cwd: workspaceRoot && workspaceRoot !== '' ? workspaceRoot : undefined,
         env: { ...process.env, LANG: 'en_US.UTF-8' },
       },
-      (error, stdout) => {
+      (error, stdout, stderr) => {
         if (error) {
-          reject(Object.assign(new Error(`执行失败：${error.message}`), { code: 'script-failed' }))
+          const stderrText = String((stderr && String(stderr).trim()) || (error && error.stderr) || '').trim()
+          const timedOut = error.killed === true || error.signal === 'SIGTERM' || error.code === 'ETIMEDOUT'
+          const firstLine = stderrText.split('\n').map((line) => line.trim()).filter(Boolean)[0] || ''
+          const reason = timedOut
+            ? `超时（${limit}ms 未完成，已终止）`
+            : (firstLine.slice(0, 300) || String(error.code || '未知错误'))
+          reject(Object.assign(
+            new Error(`命令「${String(commandLine).slice(0, 120)}」执行失败：${reason}`),
+            { code: 'script-failed', stderr: stderrText.slice(0, 4000) },
+          ))
           return
         }
         resolve(String(stdout ?? ''))
