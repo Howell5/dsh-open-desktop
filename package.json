@@ -1,6 +1,6 @@
 {
   "name": "dsh-open-desktop",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "type": "module",
   "description": "把 DSH 的中栏变成可拖拽的数据卡片墙：每张卡片是一条真实会话，用 view/ 里的前端代码渲染，自带刷新节奏。",
   "keywords": [

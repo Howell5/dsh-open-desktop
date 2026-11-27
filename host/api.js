@@ -228,14 +228,58 @@ function apiHandler(board, origin) {
   }
 }
 
+// 把路由接进 DSH 的准入检查：Host/Origin 栅栏 + 已认证的浏览器 peer。
+// 没有这一步，浏览器里任何一个网页都能直接打本机的 /open-desktop/*：
+// 那里能触发 card-create / renderer-fetch 这类动作，光靠 Origin 头挡不住。
+// 老版本没有 connection 服务时返回 undefined，退回下面各自原有的 Origin 校验。
+// 跨站页面挡在这里：浏览器一定会带 Sec-Fetch-Site，非浏览器（curl 之类）不带，
+// 两种都不是同源页面发起的，直接拒绝。Host 再比一次，挡 DNS rebinding。
+function localRejection(req) {
+  // 浏览器一定会带 Sec-Fetch-Site，只有非浏览器（curl、本机进程）能省掉它。
+  // 跨站页面（cross-site / same-site）一律拒绝；同源页面和直接打开则放行。
+  // 本机进程仍可直连——它们本来就能读你的文件，不在这条防线要解决的问题里。
+  const site = req.headers['sec-fetch-site']
+  if (site !== undefined && site !== 'same-origin' && site !== 'none') return 403
+  return undefined
+}
+
+function admissionCheck(ctx) {
+  let check
+  try {
+    const connection = ctx.connection
+    if (connection && typeof connection.requestRejection === 'function') check = connection.requestRejection.bind(connection)
+  } catch { check = undefined }
+  return (req) => {
+    if (check === undefined) return undefined
+    try {
+      const rejection = check(req)
+      return typeof rejection === 'number' ? rejection : undefined
+    } catch {
+      return undefined
+    }
+  }
+}
+
+const guard = (admission, handler) => (req, res) => {
+  const rejection = admission(req)
+  if (rejection !== undefined) {
+    res.writeHead(rejection, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' })
+    res.end(rejection === 401 ? 'Unauthorized' : 'Forbidden')
+    return
+  }
+  return handler(req, res)
+}
+
 export function registerRoutes(ctx, board, sessions) {
   let origin = ''
   try { origin = ctx.webServer.getOrigin() } catch { origin = '' }
+  const admission = admissionCheck(ctx)
+  const guardAll = (handler) => guard((req) => admission(req) ?? localRejection(req), handler)
   const active = new Set()
   const disposers = [
-    ctx.webServer.register({ kind: 'exact', path: '/open-desktop/stream', handler: streamHandler(board, active) }),
-    ctx.webServer.register({ kind: 'exact', path: '/open-desktop/card-stream', handler: cardStreamHandler(board, sessions, origin, active) }),
-    ctx.webServer.register({ kind: 'exact', path: '/open-desktop/api', handler: apiHandler(board, origin) }),
+    ctx.webServer.register({ kind: 'exact', path: '/open-desktop/stream', handler: guardAll(streamHandler(board, active)) }),
+    ctx.webServer.register({ kind: 'exact', path: '/open-desktop/card-stream', handler: guardAll(cardStreamHandler(board, sessions, origin, active)) }),
+    ctx.webServer.register({ kind: 'exact', path: '/open-desktop/api', handler: guardAll(apiHandler(board, origin)) }),
   ]
   return () => {
     for (const res of active) { try { res.end() } catch { /* 已结束 */ } }
