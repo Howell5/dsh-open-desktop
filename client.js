@@ -1,10 +1,10 @@
 /**
- * Open Desktop · client
+ * Little Widgets · client
  *
  * Generated from src/client by `npm run build`. Do not edit by hand.
  */
 window.__ModuleLoader__.load({
-  id: 'dsh-open-desktop',
+  id: 'dsh-little-widgets',
   factory(require) {
     const module = { exports: {} };
     const exports = module.exports;
@@ -4724,9 +4724,9 @@ window.__ModuleLoader__.load({
     var FLIP_MS = 220;
     var FLIP_EASING = "cubic-bezier(.2,0,0,1)";
     var CLIENT_BUILD = "b2026-11-23-dnd";
-    var STREAM_URL = "/open-desktop/stream";
-    var CARD_STREAM_URL = "/open-desktop/card-stream";
-    var API_URL = "/open-desktop/api";
+    var STREAM_URL = "/little-widgets/stream";
+    var CARD_STREAM_URL = "/little-widgets/card-stream";
+    var API_URL = "/little-widgets/api";
     var POLL_MS = 1e4;
     var RECONNECT_MS = 15e3;
     var GRID = { columns: 12, rowHeight: 40, gap: 8 };
@@ -5064,7 +5064,7 @@ window.__ModuleLoader__.load({
       };
     }
     function StyleTag() {
-      return h("style", { "data-plugin": "dsh-open-desktop", dangerouslySetInnerHTML: { __html: styles_default } });
+      return h("style", { "data-plugin": "dsh-little-widgets", dangerouslySetInnerHTML: { __html: styles_default } });
     }
     function inlineNodes(text, prefix) {
       const pattern = /(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\(https?:\/\/[^)\s]+\)|\*[^*\s][^*]*\*)/g;
@@ -7836,7 +7836,7 @@ window.__ModuleLoader__.load({
       apply(ctx) {
         const store = createDeskStore(function openBoard() {
           try {
-            ctx.layout.selectPanel("open-desktop");
+            ctx.layout.selectPanel("little-widgets");
           } catch (error) {
           }
         });
@@ -7881,7 +7881,7 @@ window.__ModuleLoader__.load({
               await workspace.openSession(sessionId);
               return;
             }
-            owned = { sessionId, reference: sessions.retain(sessionId, { source: "open-desktop-card" }), released: false };
+            owned = { sessionId, reference: sessions.retain(sessionId, { source: "little-widgets-card" }), released: false };
             pendingReferences.add(owned);
             await owned.reference.ready;
             if (disposed || ticket !== navigation) return;
@@ -7907,13 +7907,13 @@ window.__ModuleLoader__.load({
             release(cardSessionRef);
             cardSessionRef = null;
           };
-        }, "open-desktop: card session reference");
+        }, "little-widgets: card session reference");
         ctx.effect(function() {
           store.start();
           return function() {
             store.stop();
           };
-        }, "open-desktop: stream");
+        }, "little-widgets: stream");
         ctx.effect(function() {
           function onError(event) {
             try {
@@ -7931,11 +7931,11 @@ window.__ModuleLoader__.load({
             window.removeEventListener("error", onError);
             window.removeEventListener("unhandledrejection", onRejection);
           };
-        }, "open-desktop: error reporting");
+        }, "little-widgets: error reporting");
         ctx.slots.inject("sidebar.panellist", function() {
           return ctx.slots.register({
             name: "sidebar.panellist",
-            id: "open-desktop",
+            id: "little-widgets",
             order: 20,
             label: function() {
               return "\u5C0F\u7EC4\u4EF6";
@@ -7943,20 +7943,20 @@ window.__ModuleLoader__.load({
           }, PanelIcon);
         });
         ctx.slots.inject("conversation.session.header.actions", function() {
-          return ctx.slots.register({ name: "conversation.session.header.actions", id: "open-desktop-card", order: 20 }, function CardSessionHeader(props) {
+          return ctx.slots.register({ name: "conversation.session.header.actions", id: "little-widgets-card", order: 20 }, function CardSessionHeader(props) {
             return h(NativeCardActions, {
               sessionId: props.sessionId,
               store,
               onReturn: function(cardId) {
                 cancelPendingNavigation();
                 store.focusCard(cardId);
-                ctx.layout.selectPanel("open-desktop");
+                ctx.layout.selectPanel("little-widgets");
               }
             });
           });
         });
         ctx.slots.inject("main", function() {
-          return ctx.slots.register({ name: "main", key: "open-desktop" }, function OpenDesktopPanel() {
+          return ctx.slots.register({ name: "main", key: "little-widgets" }, function LittleWidgetsPanel() {
             return h(PanelBoundary, null, h(Board, {
               store,
               openSession: openCardSession

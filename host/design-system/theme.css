@@ -1,4 +1,4 @@
-/* Open Desktop design system, applied inside every card iframe.
+/* Little Widgets design system, applied inside every card iframe.
  *
  * The host injects this stylesheet before the card's own style.css.
  * Only --od-* tokens are used here; card code should follow the same rule.

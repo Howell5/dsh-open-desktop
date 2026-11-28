@@ -1,4 +1,4 @@
-# Open Desktop
+# Little Widgets
 
 Turn the DeepSeek Harness middle pane into a **draggable wall of live data cards**.
 
@@ -6,15 +6,20 @@ Every card is a real session's permanent slot: an agent writes code inside the c
 directory (collector script, service, frontend), and the card renders it with `view/`
 HTML/CSS/JS inside a sandboxed iframe.
 
-![Open Desktop board](https://cdn.jsdelivr.net/gh/Howell5/dsh-open-desktop@main/docs/hero.png)
+![Little Widgets board](https://cdn.jsdelivr.net/gh/Howell5/dsh-little-widgets@main/docs/hero.png)
 
 ## Install
 
 ```bash
-dsh plugin --profile desktop add dsh-open-desktop
+dsh plugin --profile desktop add dsh-little-widgets
 ```
 
 Requires DSH `>= 0.2.2-rc.3`. Restart DSH once; a "Widgets" entry shows up in the sidebar.
+
+> Formerly **Open Desktop** (`dsh-open-desktop`). To upgrade from the old package:
+> `dsh plugin --profile desktop remove dsh-open-desktop && dsh plugin --profile desktop add dsh-little-widgets`.
+> Your cards and sessions stay put: if only `~/.dsh/open-desktop/` exists the plugin keeps using it,
+> and the old "Open-Desktop" workspace is renamed to "Little-Widgets".
 
 ## What you get
 

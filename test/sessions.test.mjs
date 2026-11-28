@@ -85,7 +85,7 @@ const ctx = { get: name => services[name], on, logger: { warn() {} } }
 const sessions = createSessions({ ctx, paths, cards, refresh })
 
 await sessions.start?.()
-check('startup registers the named workspace', [...workspaces.values()].some(workspace => workspace.path === paths.cards && workspace.title === 'Open-Desktop'))
+check('startup registers the named workspace', [...workspaces.values()].some(workspace => workspace.path === paths.cards && workspace.title === 'Little-Widgets'))
 
 const [card, second] = await Promise.all([
   sessions.create({ title: 'WiFi 质量', size: { w: 6, h: 5 }, view: 'auto' }),
@@ -237,7 +237,7 @@ const uiRename = new Promise(resolve => { onRename = title => { if (title === 'U
 const req = new EventEmitter()
 req.method = 'POST'; req.headers = { origin: 'http://localhost' }
 let response
-const request = routes.get('/open-desktop/api').handler(req, { writeHead() {}, end(value) { response = JSON.parse(value) } })
+const request = routes.get('/little-widgets/api').handler(req, { writeHead() {}, end(value) { response = JSON.parse(value) } })
 req.emit('data', Buffer.from(JSON.stringify({ action: 'card-update', payload: { id: legacy.id, title: 'UI rename' } })))
 req.emit('end')
 await request

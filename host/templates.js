@@ -1,8 +1,8 @@
-// Open Desktop v3 · 采集器模板
+// Little Widgets v3 · 采集器模板
 //
 // 模板只负责「取一次数 → 返回 value（任意 JSON）」。渲染完全交给渲染器。
 // 每个模板声明最低权限：read = 只读数据（HTTP / 系统只读信息）；full = 可执行本机命令。
-const UA = 'open-desktop/3 (+deepseek-harness plugin)'
+const UA = 'little-widgets/3 (+deepseek-harness plugin)'
 
 async function requestJson(url, timeoutMs, headers = {}) {
   const response = await fetch(url, {

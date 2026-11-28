@@ -28,7 +28,7 @@ const checksum = { params: { [constants.ZSTD_c_checksumFlag]: 1 } }
 const frame = (value) => zstdCompressSync(Buffer.from(`${JSON.stringify(value)}\n`), checksum)
 const logBuffer = (header, events) => Buffer.concat([frame(header), ...events.map(frame)])
 
-check('project key matches DSH directory encoding', projectKey('/Users/example/.dsh/open-desktop/cards') === '--Users-example-.dsh-open-desktop-cards--', projectKey('/Users/example/.dsh/open-desktop/cards'))
+check('project key matches DSH directory encoding', projectKey('/Users/example/.dsh/little-widgets/cards') === '--Users-example-.dsh-little-widgets-cards--', projectKey('/Users/example/.dsh/little-widgets/cards'))
 check('segment encoding escapes unsafe characters', encodeSegment('a b') === 'a~0020b' && encodeSegment('a/b') === 'a~002Fb' && encodeSegment('../x') === '..~002Fx')
 
 const oldCardDir = join(paths.cards, 'session-card-old')
@@ -45,8 +45,8 @@ const original = logBuffer(header, events)
 const framesBefore = scanZstdFrames(original).frames
 check('scanner finds every appended frame', framesBefore.length === 3)
 const trailing = original.subarray(framesBefore[0].end)
-const rewritten = replaceHeaderCwd(original, '/Users/example/.dsh/open-desktop/cards')
-check('header rewrite changes only the cwd', rewritten.header.cwd === '/Users/example/.dsh/open-desktop/cards')
+const rewritten = replaceHeaderCwd(original, '/Users/example/.dsh/little-widgets/cards')
+check('header rewrite changes only the cwd', rewritten.header.cwd === '/Users/example/.dsh/little-widgets/cards')
 check('event frames stay byte-identical', rewritten.buffer.subarray(scanZstdFrames(rewritten.buffer).frames[0].end).equals(trailing))
 check('rewritten log still scans complete', scanZstdFrames(rewritten.buffer).frames.length === framesBefore.length &&
   scanZstdFrames(rewritten.buffer).torn === undefined)

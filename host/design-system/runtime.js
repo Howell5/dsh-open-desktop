@@ -1,4 +1,4 @@
-/* Open Desktop design system runtime helpers (inside the card iframe).
+/* Little Widgets design system runtime helpers (inside the card iframe).
  *
  * The host injects this script before the card's own view.js.
  * It only provides structure and layout shortcuts; content stays with the card.

@@ -1,4 +1,4 @@
-// Open Desktop · 本机命令执行（卡片目录内）
+// Little Widgets · 本机命令执行（卡片目录内）
 //
 // execFile 不经 shell（参数逐个传）、超时、输出上限；能拿到 DSH sandbox 时按
 // workspace-write 限制在卡片目录内。卡片能跑什么由 agent 在目录里写代码决定，

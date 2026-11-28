@@ -1,4 +1,4 @@
-# Open Desktop
+# Little Widgets
 
 [English](README.en.md) · 中文
 
@@ -6,15 +6,19 @@
 
 每张卡片不是静态组件，而是**一条真实 session 的持久展示位**：agent 在卡片目录里写代码（取数脚本、服务、前端），内容用 `view/` 里的 HTML/CSS/JS 在沙箱 iframe 中渲染。
 
-![Open Desktop 板面](https://cdn.jsdelivr.net/gh/Howell5/dsh-open-desktop@main/docs/hero.png)
+![Little Widgets 板面](https://cdn.jsdelivr.net/gh/Howell5/dsh-little-widgets@main/docs/hero.png)
 
 ## 安装
 
 ```bash
-dsh plugin --profile desktop add dsh-open-desktop
+dsh plugin --profile desktop add dsh-little-widgets
 ```
 
 要求 DSH `>=0.2.2-rc.3`。装完重启一次 DSH，侧栏出现「小组件」。
+
+> 插件原名 **Open Desktop**（`dsh-open-desktop`）。从旧包升级：
+> `dsh plugin --profile desktop remove dsh-open-desktop && dsh plugin --profile desktop add dsh-little-widgets`。
+> 卡片和会话都不用动：只有旧目录 `~/.dsh/open-desktop/` 时插件会继续用它，旧的「Open-Desktop」工作区会自动改名为「Little-Widgets」。
 
 ## 它解决什么
 
@@ -44,7 +48,7 @@ dsh plugin --profile desktop add dsh-open-desktop
 ## 卡片模型
 
 ```
-$DSH_HOME/open-desktop/
+$DSH_HOME/little-widgets/
   cards/<id>/card.json     # 标题/尺寸/顺序/刷新约定
   cards/<id>/view/         # 唯一渲染源：index.html + style.css + view.js
   cards/<id>/data/         # 数据文件（agent 自由写入）
@@ -69,7 +73,7 @@ npm run harness      # 可选：普通浏览器里的拖拽验证台
 - 卡片的取数命令是**你自己写进那张卡的 `card.json`** 的，插件本身不预置、不执行任何命令。
 - 没有遥测、没有统计上报、没有默认外联。
 - 卡片的网络请求走宿主代理，受 CSP 和每张卡自己的 capabilities 白名单约束；`view/` 里不能直连网络、不能加载外链资源。
-- 插件注册的 HTTP 路由（`/open-desktop/api` 等）会拒绝跨站请求：浏览器带来的 `Sec-Fetch-Site` 不是 `same-origin` / `none` 一律 403，所以别的网页没法通过它触发动作。
+- 插件注册的 HTTP 路由（`/little-widgets/api` 等）会拒绝跨站请求：浏览器带来的 `Sec-Fetch-Site` 不是 `same-origin` / `none` 一律 403，所以别的网页没法通过它触发动作。
 - 卡片想保存交互状态时，只能写自己目录下的 `data/state.json`（JSON，≤64KB），宿主不暴露任意路径。
 
 ## 兼容性

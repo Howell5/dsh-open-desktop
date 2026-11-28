@@ -1,4 +1,4 @@
-// Open Desktop design system assets.
+// Little Widgets design system assets.
 // Loaded once at host startup and inlined into every card iframe.
 import { readFileSync } from 'node:fs'
 

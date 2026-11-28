@@ -5,8 +5,9 @@ import { createCardTools } from './tools.js'
 import { migrateCardSessions } from './migrate.js'
 import { ensureViewScaffold } from './views.js'
 
-export const WORKSPACE_TITLE = 'Open-Desktop'
-export const LEGACY_WORKSPACE_TITLE = 'Open Desktop'
+export const WORKSPACE_TITLE = 'Little-Widgets'
+// 插件原名 Open Desktop：老安装注册过这两个名字的工作区，启动时改成新名字（路径不变）
+export const LEGACY_WORKSPACE_TITLES = ['Open-Desktop', 'Open Desktop']
 
 export const CARD_OPENING = [
   '【卡片任务】你是这张卡片自己的 Agent，当前工作目录就是卡片目录，可以写任何代码。',
@@ -75,7 +76,7 @@ export function createSessions({ ctx, paths, cards, refresh, onChange }) {
     return card
   }
   const notice = () => onChange?.()
-  const warn = (message, error) => ctx.logger?.warn?.(`[open-desktop] ${message}: ${error?.message ?? error}`)
+  const warn = (message, error) => ctx.logger?.warn?.(`[little-widgets] ${message}: ${error?.message ?? error}`)
   // building 只在 card_finish 里被清掉；生成失败或中途退出时必须由这里收尾，
   // 否则这张卡会永远占着「构建中」和并发名额。
   const settleBuilding = async (card) => {
@@ -101,8 +102,7 @@ export function createSessions({ ctx, paths, cards, refresh, onChange }) {
       workspacePending = (async () => {
         await mkdir(paths.cards, { recursive: true })
         workspace = await registry.resolveByPath(paths.cards) ?? await registry.create(paths.cards, WORKSPACE_TITLE)
-        // Older installs registered the display name with a space; keep the path, drop the space.
-        if (workspace.title === LEGACY_WORKSPACE_TITLE && typeof workspace.setTitle === 'function') {
+        if (LEGACY_WORKSPACE_TITLES.includes(workspace.title) && typeof workspace.setTitle === 'function') {
           await workspace.setTitle(WORKSPACE_TITLE)
           workspace.title = WORKSPACE_TITLE
         }
@@ -158,7 +158,7 @@ export function createSessions({ ctx, paths, cards, refresh, onChange }) {
           disposers.push(agent.ctx.tools.register(definition))
         }
         if (typeof agent.ctx.systemPrompt?.section === 'function') {
-          disposers.push(agent.ctx.systemPrompt.section({ name: 'open-desktop-card', order: 900, text: CARD_PROMPT }))
+          disposers.push(agent.ctx.systemPrompt.section({ name: 'little-widgets-card', order: 900, text: CARD_PROMPT }))
         }
         scoped.set(sessionId, { agent, disposers })
         await syncTitle(cardId, agent)

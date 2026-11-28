@@ -59,7 +59,7 @@ async function api(payload) {
   req.method = 'POST'
   req.headers = { origin: 'http://localhost' }
   let body
-  const running = routes.get('/open-desktop/api').handler(req, { writeHead() {}, end(value) { body = JSON.parse(value) } })
+  const running = routes.get('/little-widgets/api').handler(req, { writeHead() {}, end(value) { body = JSON.parse(value) } })
   req.emit('data', Buffer.from(JSON.stringify({ action: 'card-session', payload })))
   req.emit('end')
   await running

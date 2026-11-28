@@ -37,12 +37,12 @@ const sessions = {
 }
 
 registerRoutes(ctx, board, sessions)
-check('注册了 card-stream 路由', routes.has('/open-desktop/card-stream'))
+check('注册了 card-stream 路由', routes.has('/little-widgets/card-stream'))
 
-const handler = routes.get('/open-desktop/card-stream').handler
+const handler = routes.get('/little-widgets/card-stream').handler
 const req = new EventEmitter()
 req.method = 'GET'
-req.url = '/open-desktop/card-stream?id=card1'
+req.url = '/little-widgets/card-stream?id=card1'
 req.headers = {}
 const response = { status: 0, headers: null, body: '' }
 const res = {
@@ -64,7 +64,7 @@ check('回合结束发 end', response.body.includes('event: end'))
 // 不存在的卡片直接 404，不进流
 const req2 = new EventEmitter()
 req2.method = 'GET'
-req2.url = '/open-desktop/card-stream?id=nope'
+req2.url = '/little-widgets/card-stream?id=nope'
 req2.headers = {}
 const response2 = { status: 0, body: '' }
 const res2 = {
@@ -85,7 +85,7 @@ registerRoutes({
 }, board, { follow: async function* () {} })
 const req3 = new EventEmitter()
 req3.method = 'GET'
-req3.url = '/open-desktop/card-stream?id=card1'
+req3.url = '/little-widgets/card-stream?id=card1'
 req3.headers = {}
 const response3 = { status: 0, body: '' }
 const res3 = {
@@ -94,7 +94,7 @@ const res3 = {
   end: () => {},
   on: () => {},
 }
-routes3.get('/open-desktop/card-stream').handler(req3, res3)
+routes3.get('/little-widgets/card-stream').handler(req3, res3)
 await wait(60)
 check('不支持流式时发 disabled', response3.body.includes('event: disabled'), response3.body.slice(-200))
 

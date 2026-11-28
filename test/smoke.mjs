@@ -12,6 +12,7 @@ const FILES = [
   './test/migrate.test.mjs',
   './test/views.test.mjs',
   './test/view-lint.test.mjs',
+  './test/rename.test.mjs',
 ]
 
 const results = []

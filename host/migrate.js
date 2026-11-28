@@ -196,7 +196,7 @@ export async function migrateCardSessions({ ctx, paths, workspace }) {
       }
     } catch (error) {
       const message = `迁移卡片会话 ${header.id} 失败：${error?.message ?? error}`
-      ctx?.logger?.warn?.(`[open-desktop] ${message}`)
+      ctx?.logger?.warn?.(`[little-widgets] ${message}`)
       warnings.push(message)
       report.details.push({ id: header.id, action: 'failed', reason: message })
     }

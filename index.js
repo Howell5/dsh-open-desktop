@@ -1,4 +1,4 @@
-// Open Desktop · Host 装配
+// Little Widgets · Host 装配
 //
 // 卡片 = 一条 DSH session 的持久展示位；卡片目录就是 session 的 cwd。
 // 数据流：cards(侧车) → refresh(定时取数) → board(State/动作) → api(SSE/POST)
@@ -11,7 +11,7 @@ import { createBoard } from './host/board.js'
 import { registerRoutes } from './host/api.js'
 import { migrateViews } from './host/views.js'
 
-export const name = 'open-desktop'
+export const name = 'little-widgets'
 export const inject = ['webServer', 'sessionController', 'workspaceRegistry', 'workingDirectory', 'sessionTitle', 'sessionPersistence']
 
 export function apply(ctx, config = {}) {
@@ -26,10 +26,10 @@ export function apply(ctx, config = {}) {
   const cards = createCards({
     paths,
     onChange: (event) => {
-      try { refresh?.sync(cards.list()) } catch (error) { ctx.logger?.warn?.(`[open-desktop] 刷新配置同步失败：${error?.message ?? error}`) }
+      try { refresh?.sync(cards.list()) } catch (error) { ctx.logger?.warn?.(`[little-widgets] 刷新配置同步失败：${error?.message ?? error}`) }
       board?.publish()
       if (event?.id) void sessions.syncTitle(event.id).catch(error => {
-        ctx.logger?.warn?.(`[open-desktop] 会话标题同步失败：${error?.message ?? error}`)
+        ctx.logger?.warn?.(`[little-widgets] 会话标题同步失败：${error?.message ?? error}`)
       })
     },
   })
@@ -50,18 +50,18 @@ export function apply(ctx, config = {}) {
   ctx.effect(() => () => {
     try { refresh.stop() } catch { /* 忽略 */ }
     try { sessions.disposeAll() } catch { /* 忽略 */ }
-  }, 'open-desktop: teardown')
+  }, 'little-widgets: teardown')
 
   ctx.effect(() => {
     const dispose = registerRoutes(ctx, board, sessions)
     return () => dispose()
-  }, 'open-desktop: routes')
+  }, 'little-widgets: routes')
 
   void (async () => {
     try {
       await ensureLayout(paths)
       await migrateViews(paths, (message) => {
-        try { ctx.logger?.info?.(`[open-desktop] ${message}`) } catch { /* 忽略 */ }
+        try { ctx.logger?.info?.(`[little-widgets] ${message}`) } catch { /* 忽略 */ }
       })
       await cards.start()
       await sessions.start()
@@ -69,7 +69,7 @@ export function apply(ctx, config = {}) {
       await purgeTrash(paths)
       board.publish()
     } catch (error) {
-      try { ctx.logger?.warn?.(`[open-desktop] 启动失败：${error?.message ?? error}`) } catch { /* 忽略 */ }
+      try { ctx.logger?.warn?.(`[little-widgets] 启动失败：${error?.message ?? error}`) } catch { /* 忽略 */ }
     }
   })()
 }

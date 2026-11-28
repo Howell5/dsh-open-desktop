@@ -1,4 +1,4 @@
-// Open Desktop v3 · 卡片注册表（内存视图 + card.json 侧车）
+// Little Widgets v3 · 卡片注册表（内存视图 + card.json 侧车）
 //
 // 板面、采集器、Web 都只通过这里读写卡片。每次变更写侧车并广播，保证
 // 磁盘（card.json）是唯一真相源，内存只是它的视图。

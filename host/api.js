@@ -1,4 +1,4 @@
-// Open Desktop · HTTP 入口（SSE + 自鉴权 POST API）
+// Little Widgets · HTTP 入口（SSE + 自鉴权 POST API）
 //
 // 插件路由不经过 DSH 页面鉴权，所以这里自己做 Origin 校验、只收 POST、限制请求体大小。
 const MAX_BODY_BYTES = 256 * 1024
@@ -229,7 +229,7 @@ function apiHandler(board, origin) {
 }
 
 // 把路由接进 DSH 的准入检查：Host/Origin 栅栏 + 已认证的浏览器 peer。
-// 没有这一步，浏览器里任何一个网页都能直接打本机的 /open-desktop/*：
+// 没有这一步，浏览器里任何一个网页都能直接打本机的 /little-widgets/*：
 // 那里能触发 card-create / renderer-fetch 这类动作，光靠 Origin 头挡不住。
 // 老版本没有 connection 服务时返回 undefined，退回下面各自原有的 Origin 校验。
 // 跨站页面挡在这里：浏览器一定会带 Sec-Fetch-Site，非浏览器（curl 之类）不带，
@@ -277,9 +277,9 @@ export function registerRoutes(ctx, board, sessions) {
   const guardAll = (handler) => guard((req) => admission(req) ?? localRejection(req), handler)
   const active = new Set()
   const disposers = [
-    ctx.webServer.register({ kind: 'exact', path: '/open-desktop/stream', handler: guardAll(streamHandler(board, active)) }),
-    ctx.webServer.register({ kind: 'exact', path: '/open-desktop/card-stream', handler: guardAll(cardStreamHandler(board, sessions, origin, active)) }),
-    ctx.webServer.register({ kind: 'exact', path: '/open-desktop/api', handler: guardAll(apiHandler(board, origin)) }),
+    ctx.webServer.register({ kind: 'exact', path: '/little-widgets/stream', handler: guardAll(streamHandler(board, active)) }),
+    ctx.webServer.register({ kind: 'exact', path: '/little-widgets/card-stream', handler: guardAll(cardStreamHandler(board, sessions, origin, active)) }),
+    ctx.webServer.register({ kind: 'exact', path: '/little-widgets/api', handler: guardAll(apiHandler(board, origin)) }),
   ]
   return () => {
     for (const res of active) { try { res.end() } catch { /* 已结束 */ } }

@@ -1,5 +1,5 @@
 /**
- * Open Desktop —— DSH Web UI 小组件板（Client 半）
+ * Little Widgets —— DSH Web UI 小组件板（Client 半）
  *
  * 板面 = 12 列网格，widget 用 {w,h} 跨度；卡片内容是 view/ 里的前端代码，
  *        在沙箱 iframe 中渲染，宿主先注入设计系统（od-* 类 + --od-* token）
@@ -18,9 +18,9 @@ const FLIP_MS = 220;
 const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
 
     const CLIENT_BUILD = 'b2026-11-23-dnd';
-    const STREAM_URL = '/open-desktop/stream';
-    const CARD_STREAM_URL = '/open-desktop/card-stream';
-    const API_URL = '/open-desktop/api';
+    const STREAM_URL = '/little-widgets/stream';
+    const CARD_STREAM_URL = '/little-widgets/card-stream';
+    const API_URL = '/little-widgets/api';
     const POLL_MS = 10000;
     const RECONNECT_MS = 15000;
 
@@ -397,7 +397,7 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
     // ---------------- 样式 ----------------
 
     function StyleTag() {
-      return h('style', { 'data-plugin': 'dsh-open-desktop', dangerouslySetInnerHTML: { __html: STYLES } });
+      return h('style', { 'data-plugin': 'dsh-little-widgets', dangerouslySetInnerHTML: { __html: STYLES } });
     }
 
     // ---------------- 轻量 markdown（对话正文） ----------------
@@ -2747,7 +2747,7 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
       inject: ['slots', 'layout'],
       apply(ctx) {
         const store = createDeskStore(function openBoard() {
-          try { ctx.layout.selectPanel('open-desktop'); } catch (error) { /* 面板未注册 */ }
+          try { ctx.layout.selectPanel('little-widgets'); } catch (error) { /* 面板未注册 */ }
         });
 
         // 卡片会话在 Client 侧也需要一个 generation，原生会话视图才拿得到 binding。
@@ -2787,7 +2787,7 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
               await workspace.openSession(sessionId);
               return;
             }
-            owned = { sessionId: sessionId, reference: sessions.retain(sessionId, { source: 'open-desktop-card' }), released: false };
+            owned = { sessionId: sessionId, reference: sessions.retain(sessionId, { source: 'little-widgets-card' }), released: false };
             pendingReferences.add(owned);
             await owned.reference.ready;
             if (disposed || ticket !== navigation) return;
@@ -2815,12 +2815,12 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
             release(cardSessionRef);
             cardSessionRef = null;
           };
-        }, 'open-desktop: card session reference');
+        }, 'little-widgets: card session reference');
 
         ctx.effect(function () {
           store.start();
           return function () { store.stop(); };
-        }, 'open-desktop: stream');
+        }, 'little-widgets: stream');
 
         ctx.effect(function () {
           function onError(event) {
@@ -2834,30 +2834,30 @@ const FLIP_EASING = 'cubic-bezier(.2,0,0,1)';
             window.removeEventListener('error', onError);
             window.removeEventListener('unhandledrejection', onRejection);
           };
-        }, 'open-desktop: error reporting');
+        }, 'little-widgets: error reporting');
 
         ctx.slots.inject('sidebar.panellist', function () {
           return ctx.slots.register({
-            name: 'sidebar.panellist', id: 'open-desktop', order: 20,
+            name: 'sidebar.panellist', id: 'little-widgets', order: 20,
             label: function () { return '小组件'; },
           }, PanelIcon);
         });
 
         ctx.slots.inject('conversation.session.header.actions', function () {
-          return ctx.slots.register({ name: 'conversation.session.header.actions', id: 'open-desktop-card', order: 20 }, function CardSessionHeader(props) {
+          return ctx.slots.register({ name: 'conversation.session.header.actions', id: 'little-widgets-card', order: 20 }, function CardSessionHeader(props) {
             return h(NativeCardActions, {
               sessionId: props.sessionId, store: store,
               onReturn: function (cardId) {
                 cancelPendingNavigation();
                 store.focusCard(cardId);
-                ctx.layout.selectPanel('open-desktop');
+                ctx.layout.selectPanel('little-widgets');
               },
             });
           });
         });
 
         ctx.slots.inject('main', function () {
-          return ctx.slots.register({ name: 'main', key: 'open-desktop' }, function OpenDesktopPanel() {
+          return ctx.slots.register({ name: 'main', key: 'little-widgets' }, function LittleWidgetsPanel() {
             return h(PanelBoundary, null, h(Board, {
               store: store,
               openSession: openCardSession,

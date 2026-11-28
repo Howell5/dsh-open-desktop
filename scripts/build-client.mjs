@@ -27,7 +27,7 @@ const options = {
 }
 
 const wrap = (code) => `/**
- * Open Desktop · client
+ * Little Widgets · client
  *
  * Generated from src/client by \`npm run build\`. Do not edit by hand.
  */

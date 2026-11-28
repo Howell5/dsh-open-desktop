@@ -1,4 +1,4 @@
-// Open Desktop · 刷新调度（薄契约）
+// Little Widgets · 刷新调度（薄契约）
 //
 // 每张卡片一个定时器。card.refresh 描述"数据怎么来"：
 //   template → 内置模板取数

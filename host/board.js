@@ -1,4 +1,4 @@
-// Open Desktop · 板面聚合层
+// Little Widgets · 板面聚合层
 //
 // 板面 = 同一组卡片的网格视图。这里不存卡片（card.json 是唯一真相源），
 // 只负责：组装 State、执行动作、广播变更。

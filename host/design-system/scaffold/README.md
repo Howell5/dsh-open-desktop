@@ -33,7 +33,7 @@ window.dshWidget.save(value)   // 交互卡写回自己的 data/state.json（JSO
 `command` 的每一段都写绝对路径：
 
 ```
-/usr/bin/python3 /Users/you/.dsh/open-desktop/cards/<id>/collect.py
+/usr/bin/python3 /Users/you/.dsh/little-widgets/cards/<id>/collect.py
 ```
 
 不要写 `python3 collect.py`——它依赖 `PATH` 和当前工作目录。宿主一升级，`PATH` 里的解释器就可能换掉（Homebrew 的 3.14 和系统的 3.9 行为不一样），卡片会突然报「命令失败」，而且看不出原因。

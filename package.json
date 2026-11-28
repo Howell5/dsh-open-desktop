@@ -1,6 +1,6 @@
 {
-  "name": "dsh-open-desktop",
-  "version": "0.6.8",
+  "name": "dsh-little-widgets",
+  "version": "0.7.0",
   "type": "module",
   "description": "把 DSH 的中栏变成可拖拽的数据卡片墙：每张卡片是一条真实会话，用 view/ 里的前端代码渲染，自带刷新节奏。",
   "keywords": [
@@ -59,13 +59,13 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
-  "homepage": "https://github.com/Howell5/dsh-open-desktop#readme",
+  "homepage": "https://github.com/Howell5/dsh-little-widgets#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Howell5/dsh-open-desktop.git"
+    "url": "git+https://github.com/Howell5/dsh-little-widgets.git"
   },
   "bugs": {
-    "url": "https://github.com/Howell5/dsh-open-desktop/issues"
+    "url": "https://github.com/Howell5/dsh-little-widgets/issues"
   },
   "engines": {
     "dsh": ">=0.2.2-rc.3 <0.3.0-0"

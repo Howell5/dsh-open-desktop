@@ -1,8 +1,8 @@
-# Open Desktop v4 · Host ⇄ Client 契约
+# Little Widgets v4 · Host ⇄ Client 契约
 
 > 卡片是一条 DSH session 的持久展示位。板面是同一组卡片的网格视图。
 > 卡片内容只有一种来源：`view/` 里的前端代码，在沙箱 iframe 中渲染。
-> 数据目录：`$DSH_HOME/open-desktop/`，默认 `~/.dsh/open-desktop/`；可通过 `dataDir` 配置。
+> 数据目录：`$DSH_HOME/little-widgets/`，默认 `~/.dsh/little-widgets/`；可通过 `dataDir` 配置。
 
 ## 1. card.json（侧车，唯一真相源）
 
@@ -36,9 +36,9 @@
 
 ## 2. HTTP
 
-- `GET /open-desktop/stream`：SSE，连接即推全量 State，之后每次变更推送；20s 保活。
-- `GET /open-desktop/card-stream?id=<cardId>`：兜底卡片对话的逐字流：`ready` → `live {turn,step,text}` → `end`。历史与工具卡片走 `card-turns`；原生会话使用 DSH 自己的流。
-- `POST /open-desktop/api`：Origin 校验、只收 POST、256KB 上限；返回 `{ ok, value, state }`。
+- `GET /little-widgets/stream`：SSE，连接即推全量 State，之后每次变更推送；20s 保活。
+- `GET /little-widgets/card-stream?id=<cardId>`：兜底卡片对话的逐字流：`ready` → `live {turn,step,text}` → `end`。历史与工具卡片走 `card-turns`；原生会话使用 DSH 自己的流。
+- `POST /little-widgets/api`：Origin 校验、只收 POST、256KB 上限；返回 `{ ok, value, state }`。
 
 动作：`state` / `card-create {text,title?,size?}` / `card-session {id}` / `card-prompt {id,text}` /
 `card-update {id,title?,size?,order?,refresh?}` / `card-remove {id}` / `card-reorder {ids}` /
@@ -77,7 +77,7 @@
 
 ## 4. 工作区、目录与权限
 
-插件启动时用 `workspaceRegistry.resolveByPath()` / `create()` 注册或复用路径为 `paths.cards`、默认名称为 **Open-Desktop** 的工作区。新会话只传 `workspaceId` 创建，不同时传 `cwd`。
+插件启动时用 `workspaceRegistry.resolveByPath()` / `create()` 注册或复用路径为 `paths.cards`、默认名称为 **Little-Widgets** 的工作区。新会话只传 `workspaceId` 创建，不同时传 `cwd`。
 
 - 原始 `session.header.cwd` 是工作区根目录，用于 DSH 归属与 sandbox workspace root。
 - `workingDirectory.set(agent, paths.cardDir(cardId))` 设置实际执行目录，必须在首条 prompt 之前完成。
@@ -102,6 +102,6 @@ DSH `0.2.2-rc.2` 的 workspace attachment 要求原始 cwd 严格匹配工作区
 Client 向 `conversation.session.header.actions` 追加操作，不替换原生标题、消息或输入框。只有 `sessionId` 与当前卡片映射匹配的会话显示：
 
 - **预览这张卡片**：原生 dialog 顶层浮窗，复用 `CardContent`、当前数据与主题；关闭按钮、Escape 或点击背景退出，保留当前会话。
-- **返回板面**：`ctx.layout.selectPanel('open-desktop')`，滚动并聚焦对应卡片，短暂高亮；遵循减少动画偏好。
+- **返回板面**：`ctx.layout.selectPanel('little-widgets')`，滚动并聚焦对应卡片，短暂高亮；遵循减少动画偏好。
 
 普通会话、已删除卡片及被替换的旧执行器不显示这些操作。原生会话服务不可用时，“修改”入口保留轻量卡片对话作为兜底。

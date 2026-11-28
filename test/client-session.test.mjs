@@ -192,7 +192,7 @@ if (Header) {
   preview.unmount()
   check('preview cleanup closes the dialog', closed === 1)
   button(header.render(), '返回板面').props.onClick()
-  check('return selects the board and records the right card', selected.at(-1) === 'open-desktop' && store.getSnapshot().focus?.id === 'card-a')
+  check('return selects the board and records the right card', selected.at(-1) === 'little-widgets' && store.getSnapshot().focus?.id === 'card-a')
   let scrolled = 0, focused = 0, highlighted = 0
   const target = { dataset: { widgetId: 'card-a' }, scrollIntoView() { scrolled++ }, focus() { focused++ }, animate() { highlighted++ } }
   const board = mount(boardElement.type, boardElement.props, { querySelectorAll: () => [target] })

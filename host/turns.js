@@ -1,4 +1,4 @@
-// Open Desktop v3 · 卡片会话事件 → Turn 视图
+// Little Widgets v3 · 卡片会话事件 → Turn 视图
 //
 // 复用 v2 已验证的折叠与「人话化」逻辑：Session 事件（turn/step/user/assistant/tool）
 // 折叠成 Turn → Step →（正文 + 工具卡片），历史摘要里的裸 id / 英文 key 也会被清洗。

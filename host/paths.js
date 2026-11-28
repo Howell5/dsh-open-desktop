@@ -1,14 +1,18 @@
-// Open Desktop · 数据目录与卡片侧车（card.json）
+// Little Widgets · 数据目录与卡片侧车（card.json）
 //
 // 第一元语：卡片 = 一条 DSH session 的持久展示位。
 // 卡片目录就是 session 的 cwd —— agent 可以在里面写任何代码（脚本/服务/前端/数据）。
-//   $DSH_HOME/open-desktop/
+//   $DSH_HOME/little-widgets/
 //     cards/<cardId>/card.json   侧车：标题/尺寸/顺序/刷新方式
 //     cards/<cardId>/view/       前端视图（index.html/style.css/view.js）
 //     cards/<cardId>/data/       数据文件（agent 可自由写入）
 //     cards/<cardId>/...         其它任何 agent 需要的文件
 //     _trash/                    删除的卡片目录（保留 7 天）
 //     logs/
+//
+// 插件原名 Open Desktop，数据目录是 $DSH_HOME/open-desktop/。老安装继续用旧目录：
+// 卡片的 command 里写的是绝对路径，DSH 的会话记录也按卡片目录索引，搬目录会把它们弄坏。
+import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { homedir } from 'node:os'
@@ -110,9 +114,16 @@ export function normalizeCard(raw, fallback = {}) {
   }
 }
 
-export function dataRoot(env = process.env) {
+export const DATA_DIR_NAME = 'little-widgets'
+export const LEGACY_DATA_DIR_NAME = 'open-desktop'
+
+export function dataRoot(env = process.env, exists = existsSync) {
   const given = typeof env?.DSH_HOME === 'string' ? env.DSH_HOME.trim() : ''
-  return join(given || join(homedir(), '.dsh'), 'open-desktop')
+  const base = given || join(homedir(), '.dsh')
+  const current = join(base, DATA_DIR_NAME)
+  const legacy = join(base, LEGACY_DATA_DIR_NAME)
+  if (!exists(current) && exists(legacy)) return legacy
+  return current
 }
 
 export function makePaths(root) {
