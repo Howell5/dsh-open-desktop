@@ -48,6 +48,7 @@ window.dshWidget.save(value)   // 交互卡写回自己的 data/state.json（JSO
 | `od-hero` / `od-metric-label` / `od-metric-value` | 顶部大指标 |
 | `od-delta-pill` | 涨跌胶囊；`data-tone="up\|down\|warn"` |
 | `od-rows` / `od-row` / `od-row-label` / `od-row-value` / `od-row-sub` | 列表行 |
+| `od-items` / `od-item` | 一块一块的列表项（自带左右内边距和底色）；`data-tone="up\|down\|warn"` 换语义色 |
 | `od-rank` | 行首序号 |
 | `od-list-head` / `od-list-count` | 列表头 |
 | `od-table-head` / `od-table-row` / `od-th` / `od-td` | 表格 |
@@ -104,6 +105,15 @@ window.dshWidget.save({ focus: 'NVDA', range: '1M' });
 3. 不加载外链资源：`<script src>`、`<link>`、`url(https://…)`、`@import` 都会被拦。
 4. 内容必须放得下：不要依赖滚动条；用 `od.fitRows` 或自己按高度截断。
 5. 视图总大小不超过 200KB。
+
+## 审美规则（lint 查不出来，但必须遵守）
+
+1. **一项一项的东西，左右不能贴边。** 只要列表项有底色、边框、高亮色块，或者整张卡就是由一块块小卡组成，
+   项里的文字和进度条离色块左右边缘至少 12px（`--od-space-3`）。直接用 `od-items` / `od-item` 最省事。
+2. **同一列表的每一项内边距一致。** 不要只给高亮的那一项加内边距，也不要用负 margin 让高亮色块「出血」到卡片边缘：
+   高亮项和普通项的文字左边缘必须对齐。
+3. 只用分隔线隔开、没有底色的纯文字行（`od-rows`、`od-status-rows`）可以和卡片标题左对齐；
+   但只要其中任何一行要加底色高亮，就整列改成 `od-item`。
 
 改完可以调用 `card_check` 自检；`card_finish` 会自动跑同样的检查，出错会被打回。
 

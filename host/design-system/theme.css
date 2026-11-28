@@ -259,6 +259,30 @@ a.od-row-wrap:hover .od-row-label {
   white-space: nowrap;
 }
 
+/* 一块一块的列表项：自带左右内边距。凡是有底色、边框或高亮的项都用它，
+   不要让项里的文字贴着色块边缘，也不要只给高亮那一项加内边距。 */
+.od-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--od-space-2, 8px);
+  min-height: 0;
+}
+
+.od-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--od-space-1, 4px);
+  min-width: 0;
+  padding: var(--od-space-2, 8px) var(--od-space-3, 12px);
+  border-radius: var(--od-r-control, 8px);
+  background: var(--od-surface-2);
+}
+
+.od-item[data-tone="up"] { background: color-mix(in srgb, var(--od-green) 10%, transparent); }
+.od-item[data-tone="down"] { background: color-mix(in srgb, var(--od-red) 10%, transparent); }
+.od-item[data-tone="warn"] { background: color-mix(in srgb, var(--od-amber) 12%, transparent); }
+
 .od-rank {
   flex: none;
   min-width: 18px;
